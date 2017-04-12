@@ -1,0 +1,23 @@
+藤井陽介 05-171023
+
+【動作】
+# #use "prob2.ml";;
+val twice : ('a -> 'a) -> 'a -> 'a = <fun>
+val repeat : ('a -> 'a) -> int -> 'a -> 'a = <fun>
+# twice (fun x -> 2*x) 3;;
+- : int = 12
+# repeat (fun x -> 2*x) 4 3;;
+- : int = 48
+
+【コード】
+(* 二回の合成。  *)
+
+let twice f x = f (f x);;
+
+(* n回の合成。再帰。*)
+
+let rec repeat f n x =
+    match n with
+    | 1 -> f x
+    | m -> f (repeat f (m-1) x);;
+

@@ -1,0 +1,28 @@
+藤井陽介 05-171023
+
+【動作例】
+# #use "prob4.ml";;
+val fold_right : ('a -> 'b -> 'b) -> 'a list -> 'b -> 'b = <fun>
+val fold_left : ('a -> 'b -> 'a) -> 'a -> 'b list -> 'a = <fun>
+# fold_right (fun x y -> x + y) [1;2;3;4] 0;;
+- : int = 10
+# fold_left (fun x y -> x + y) 0 [1;2;3;4];;
+- : int = 10
+
+【コード】
+
+(* fold関数の自作 *)
+let rec fold_right f arr e =
+    match arr with
+    | [] -> e
+    | x :: xs -> f x (fold_right f xs e);;
+
+(* 末尾再帰にする！ *)
+
+let rec fold_left f e arr =
+    match  arr with
+    | [] -> e
+    | x :: xs -> fold_left f (f e x) xs;;
+
+【考察】
+末尾再帰と普通の再帰になっているが実装上はfoldと渡された関数のどちらを先に実行するかの違いでしかないのだということが実感できた。

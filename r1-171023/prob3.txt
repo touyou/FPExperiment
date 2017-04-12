@@ -1,0 +1,35 @@
+藤井陽介 05-171023
+
+【動作例】
+# #use "prob3.ml";;
+val fix : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
+val sum_to : int -> int = <fun>
+val is_prime : int -> bool = <fun>
+val gcd : int -> int -> int = <fun>
+# is_prime 37;;
+- : bool = true
+# is_prime 2;;
+- : bool = true
+# sum_to 10;;
+- : int = 55
+# gcd 12 16;;
+- : int = 4
+
+【コード】
+let rec fix f x = f (fix f) x;;
+
+(* nまでの和 sum_to *)
+let sum_to n = fix (fun f x -> if x = 0 then 0 else x + f (x-1)) n;;
+
+(* nが素数かどうか is_prime *)
+let is_prime n =
+    match n with
+    | 1 -> false
+    | 2 -> true
+    | m -> not (fix (fun f (x, y) -> if y = 2 then x mod y = 0 else x mod y = 0 || f (x, y-1)) (m, m-1));;
+
+(* gcd *)
+let gcd a b = fix (fun f (x, y) -> if x mod y = 0 then y else f (y, x mod y)) (a, b);;
+
+【考察】
+今回のコードでは書き換えただけであるが、不動点コンビネータを調べてみるとメモ化などを併用することで高速化することができるということがわかった。また今回のfixでは二引数関数をとることができないので組にすることで対応してみた。
