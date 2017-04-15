@@ -1,0 +1,49 @@
+藤井陽介 05-171023
+
+【動作例】
+# #use "prob6.ml";;
+val fold_right : ('a -> 'b -> 'b) -> 'a list -> 'b -> 'b = <fun>
+val fold_left : ('a -> 'b -> 'a) -> 'a -> 'b list -> 'a = <fun>
+val appendl : 'a list -> 'a list -> 'a list = <fun>
+val appendr : 'a list -> 'a list -> 'a list = <fun>
+val filterl : ('a -> bool) -> 'a list -> 'a list = <fun>
+val filterr : ('a -> bool) -> 'a list -> 'a list = <fun>
+# appendl [1;2;3] [4;5;6];;
+- : int list = [1; 2; 3; 4; 5; 6]
+# appendr [1;2;3] [4;5;6];;
+- : int list = [1; 2; 3; 4; 5; 6]
+# filterl (fun x -> x mod 2 = 0) [1;2;3;4;5;6;7;8;9;10];;
+- : int list = [2; 4; 6; 8; 10]
+# filterr (fun x -> x mod 2 = 0) [1;2;3;4;5;6;7;8;9;10];;
+- : int list = [2; 4; 6; 8; 10]
+
+【コード】
+let rec fold_right f arr e =
+  match arr with
+  | [] -> e
+  | x :: xs -> f x (fold_right f xs e);;
+let rec fold_left f e arr =
+  match  arr with
+  | [] -> e
+  | x :: xs -> fold_left f (f e x) xs;;
+
+(* fold_left版append  *)
+let appendl a b =
+  fold_left (fun xs x -> x :: xs) b (fold_left (fun xs x -> x :: xs) [] a);;
+
+(* fold_right版append *)
+let appendr a b =
+  fold_right (fun x xs -> x :: xs) a b;;
+
+(* fold_left版filter *)
+let filterl f arr =
+  fold_left (fun e x -> if f x then x :: e else e) [] (fold_left (fun xs x -> x :: xs) [] arr);;
+
+(* fold_right版filter *)
+let filterr f arr =
+  fold_right (fun x e -> if f x then x :: e else e) arr [];;
+
+
+【考察】
+完全に再帰をfoldで置換できるという感じで、実行速度の差はそこまで感じなかった。
+パターンマッチを書かなくていい分書く量は減りシンプルに書けるが、そこにいたるまでの思考はなれないと難しい部分があるなと感じた。
