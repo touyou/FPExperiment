@@ -1,0 +1,76 @@
+05-171023 藤井陽介
+
+【動作例】
+# #use "prob1.ml";;
+type nat = Z | S of nat
+val add : nat -> nat -> nat = <fun>
+val sub : nat -> nat -> nat = <fun>
+val mulacc : nat -> nat -> nat -> nat = <fun>
+val mul : nat -> nat -> nat = <fun>
+
+val powacc : nat -> nat -> nat -> nat = <fun>
+val pow : nat -> nat -> nat = <fun>
+val n2iacc : nat -> int -> int = <fun>
+val n2i : nat -> int = <fun>
+val i2nacc : int -> nat -> nat = <fun>
+val i2n : int -> nat = <fun>
+# n2i (add (i2n 6) (i2n 7));;
+- : int = 13
+# n2i (sub (i2n 10) (i2n 7));;
+- : int = 3
+# n2i (mul (i2n 10) (i2n 7));;
+- : int = 70
+# n2i (pow (i2n 10) (i2n 4));;
+- : int = 10000
+
+【コード】
+type nat = Z | S of nat;;
+
+let rec add a b =
+  match a with
+  | Z -> b
+  | S x -> add x (S b);;
+
+let rec sub a b =
+  match b with
+  | Z -> a
+  | S x -> match a with
+          | Z -> Z
+          | S y -> sub y x;;
+
+let rec mulacc a b s =
+  match a with
+  | Z -> b
+  | S x -> mulacc x (add b s) s;;
+
+let mul a b =
+  match a with
+  | Z -> b
+  | S x -> mulacc x b b;;
+
+let rec powacc a b s =
+  match b with
+  | Z -> a
+  | S x -> powacc (mul a s) x s;;
+
+let pow a b =
+  match b with
+  | Z -> S Z
+  | S x -> powacc a x a;;
+
+let rec n2iacc n m =
+  match n with
+  | Z -> m
+  | S x -> n2iacc x (m + 1);;
+
+let n2i n = n2iacc n 0;;
+
+let rec i2nacc n m =
+  match n with
+  | 0 -> m
+  | x -> i2nacc (x - 1) (S m);;
+
+let i2n i = i2nacc i Z;;
+
+【考察】
+powとmulのパターンマッチの扱いが微妙で、最初にやったときは想定したものより一回多く足されるor掛けられるという状態となった。

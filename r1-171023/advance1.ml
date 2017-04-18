@@ -12,3 +12,5 @@ let reverse arr = rev arr [];;
 
 (* fold_leftは簡単なのでfold_rightでfold_leftを実現してそれを用いて行う *)
 (* let reversef arr = fold_right (fun x e -> e @ [x]) arr [];; *)
+(* 右からは動かしようがないから右から適用する関数を返すようにする *)
+let reversef arr = (fold_right (fun b g x -> g (b::x)) arr (fun x -> x)) [];;
