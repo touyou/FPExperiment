@@ -1,0 +1,61 @@
+05-171023 藤井陽介
+
+４番と５番両方のレポートです。
+
+【動作例】
+# eval (EIfel (EEq (EConstInt 1, EConstInt 2), EDiv (EConstInt 10, EConstInt 0), EMul (EConstInt 2, EConstInt 10)));;
+- : value = VInt 20
+# eval (EIfel (EEq (EConstInt 1, EConstInt 2), EDiv (EConstInt 10, EConstInt 0), EMul (EConstInt 2, EConstBool true)));;
+Exception: Eval_error.
+# eval (EIfel (EEq (EConstInt 1, EConstInt 1), EDiv (EConstInt 10, EConstInt 0), EMul (EConstInt 2, EConstBool true)));;
+Exception: Eval_error.
+# eval (EIfel (EEq (EConstInt 1, EConstInt 1), EDiv (EConstInt 10, EConstInt 2), EMul (EConstInt 2, EConstBool true)));;
+- : value = VInt 5
+# eval (EIfel (EEq (EConstInt 1, EConstBool true), EDiv (EConstInt 10, EConstInt 2), EMul (EConstInt 2, EConstBool true)));;
+Exception: Eval_error.
+
+【コード】
+type value = VInt of int | VBool of bool;;
+type expr =
+  | EConstInt of int
+  | EAdd of expr * expr
+  | ESub of expr * expr
+  | EMul of expr * expr
+  | EDiv of expr * expr
+  | EConstBool of bool
+  | EEq of expr * expr
+  | ELt of expr * expr
+  | EIfel of expr * expr * expr;;
+exception Eval_error;;
+
+let bool_of_value v =
+  match v with
+  | VBool b -> b
+  | VInt num -> raise Eval_error;;
+
+let num_of_value v =
+  match v with
+  | VInt num -> num
+  | VBool b -> raise Eval_error;;
+
+let rec eval exp =
+  match exp with
+  | EConstInt n -> VInt n
+  | EAdd (a, b) -> VInt (num_of_value (eval a) + num_of_value (eval b))
+  | ESub (a, b) -> VInt (num_of_value (eval a) - num_of_value (eval b))
+  | EMul (a, b) -> VInt (num_of_value (eval a) * num_of_value (eval b))
+  | EDiv (a, b) -> if num_of_value (eval b) = 0 then raise Eval_error else VInt (num_of_value (eval a) / num_of_value (eval b))
+  | EConstBool n -> VBool n
+  | EEq (a, b) -> VBool ((num_of_value (eval a)) = (num_of_value (eval b)))
+  | ELt (a, b) -> VBool ((num_of_value (eval a)) < (num_of_value (eval b)))
+  | EIfel (a, b, c) -> if bool_of_value (eval a) then (eval b) else (eval c);;
+
+【考察】
+今回は=と<の対象を数字のほうに限定して実装しました。自作のものとプリミティブのものの結合の強さがまだいまいち理解しきれてないので括弧のミスが多くなってしまいました。
+=をboolにも拡張するのであれば
+
+let isBoolean t = match t with
+  | VBool _ -> true
+  | VInt _ -> false;;
+
+みたいなのを使ってifで動作を分ければよさそうです。また今のままだとわかりにくいのでエラー型を増やしてみるのもいいかなと思いました。

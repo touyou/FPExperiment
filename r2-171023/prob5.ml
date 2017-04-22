@@ -24,11 +24,11 @@ let num_of_value v =
 let rec eval exp =
   match exp with
   | EConstInt n -> VInt n
-  | EAdd (a, b) -> num_of_value (eval a) + num_of_value (eval b)
-  | ESub (a, b) -> num_of_value (eval a) - num_of_value (eval b)
-  | EMul (a, b) -> num_of_value (eval a) * num_of_value (eval b)
-  | EDiv (a, b) -> if num_of_value (eval b) = 0 then raise Eval_error else num_of_value (eval a) - num_of_value (eval b)
+  | EAdd (a, b) -> VInt (num_of_value (eval a) + num_of_value (eval b))
+  | ESub (a, b) -> VInt (num_of_value (eval a) - num_of_value (eval b))
+  | EMul (a, b) -> VInt (num_of_value (eval a) * num_of_value (eval b))
+  | EDiv (a, b) -> if num_of_value (eval b) = 0 then raise Eval_error else VInt (num_of_value (eval a) / num_of_value (eval b))
   | EConstBool n -> VBool n
-  | EEq (a, b) -> 
-  | ELt (a, b) ->
-  | EIfel (a, b, c) -> if (eval a) then (eval b) else (eval c);;
+  | EEq (a, b) -> VBool ((num_of_value (eval a)) = (num_of_value (eval b)))
+  | ELt (a, b) -> VBool ((num_of_value (eval a)) < (num_of_value (eval b)))
+  | EIfel (a, b, c) -> if bool_of_value (eval a) then (eval b) else (eval c);;

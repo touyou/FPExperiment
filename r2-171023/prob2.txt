@@ -1,3 +1,18 @@
+05-171023 藤井陽介
+
+【動作例】
+# let tr = Node (0, (Node (1, (Node (2, Leaf, Leaf)), Leaf)), (Node (3, Leaf, (Node (4, (Node (5, Leaf, Leaf)), Leaf)))));;
+val tr : int tree =
+  Node (0, Node (1, Node (2, Leaf, Leaf), Leaf),
+   Node (3, Leaf, Node (4, Node (5, Leaf, Leaf), Leaf)))
+# preorder tr;;
+- : int list = [0; 1; 2; 3; 4; 5]
+# inorder tr;;
+- : int list = [2; 1; 0; 3; 5; 4]
+# postorder tr;;
+- : int list = [2; 1; 5; 4; 3; 0]
+
+【コード】
 let rec fold_right f arr e =
   match arr with
   | [] -> e
@@ -31,3 +46,6 @@ let rec postacc a l =
   | Node (x, y, z) -> postacc y (postacc z (x :: l));;
 
 let postorder a = postacc a [];;
+
+【考察】
+とても良く似ており、再帰部分の順番を入れ替えるだけで実現することができた。
