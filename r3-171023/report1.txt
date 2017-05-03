@@ -1,0 +1,56 @@
+①実行した様子
+$ cd Week03
+$ ocamlc -c strSet.mli
+$ ocamlc -c strSet.ml
+$ ocamlc -c sort.ml
+$ ls -F *.cm*
+sort.cmi    sort.cmo    strSet.cmi  strSet.cmo
+$ ocamlc -o sort strSet.cmo sort.cmo
+$ ls -F sort
+sort*
+$ ./sort <<END
+heredoc> bbb
+heredoc> ccc
+heredoc> aaa
+heredoc> bbb
+heredoc> END
+aaa
+bbb
+bbb
+ccc
+
+②インタプリタ内でStrSetを実行
+OCaml version 4.04.1
+
+Cannot find file topfind.
+# #load "strSet.cmo";;
+# StrSet.empty;;
+- : StrSet.t = <abstr>
+# StrSet.count_sub;;
+Error: Unbound value StrSet.count_sub
+# open StrSet;;
+# add "abc" empty;;
+- : StrSet.t = <abstr>
+# count "abc" add "abc" empty;;
+Error: This function has type string -> StrSet.t -> int
+It is applied to too many arguments; maybe you forgot a `;'.
+# count "abc" (add "abc" empty);;
+- : int = 1
+# #quit;;
+
+③mliをコンパイルしないと...
+$ ocamlc -c strSet.ml
+File "strSet.ml", line 1:
+Error: Could not find the .cmi file for interface strSet.mli.
+
+上のように.mlファイルのコンパイル段階でエラーが吐かれてしまう。
+
+④リンクの順番を入れ替えると
+$ ocamlc -o sort sort.cmo strSet.cmo
+File "_none_", line 1:
+Error: Required module `StrSet' is unavailable
+
+上のようにリンク時にStrSetが無いとエラーを吐かれてしまう。
+
+⑤OCamlMakefileを使う
+report1以下でmakeすることで使えます。
