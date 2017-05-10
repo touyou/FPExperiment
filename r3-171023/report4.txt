@@ -1,3 +1,16 @@
+171023 藤井陽介
+
+【実行例】
+# let x = StringDictionary.add "one" 1 (StringDictionary.add "two" 2 (StringDictionary.add "three" 3 (StringDictionary.add "four" 4 (StringDictionary.add "five" 5 StringDictionary.empty))));;
+val x : StringDictionary.t = <abstr>
+# StringDictionary.lookup "one" x;;
+- : int = 1
+# StringDictionary.lookup "five" x;;
+- : int = 5
+# StringDictionary.lookup "five" (StringDictionary.remove "five" x);;
+Exception: NotFound.
+
+【コード】
 type order = LT | EQ | GT
 
 module type ORDERED_TYPE =
@@ -85,3 +98,6 @@ module OrderedString =
 
 module StringDictionary =
   Dictionary (OrderedString)
+
+【考察】
+型変数の型と、実際の型が推論においては違う扱いになるようで、どちらの型も後から決められるファンクターを作成しようとしたがうまくいかなかった。キーに二分木を応用し、計算量は削除や追加、検索もO(log n)ほどになっている。

@@ -1,0 +1,45 @@
+171023 藤井陽介
+
+【動作例】
+# #use "prob1.ml";;
+type 'a myErr = Ok of 'a | Err of string
+val ( >>= ) : 'a myErr -> ('a -> 'b myErr) -> 'b myErr = <fun>
+val eLookup : 'a -> ('a * 'b) list -> 'b myErr = <fun>
+val myDiv : int -> int -> int myErr = <fun>
+val lookupDiv : 'a -> 'a -> ('a * int) list -> int myErr = <fun>
+# let table = [("x", 6); ("y", 0); ("z", 2)];;
+val table : (string * int) list = [("x", 6); ("y", 0); ("z", 2)]
+# lookupDiv "x" "y" table;;
+- : int myErr = Err "Div by Zero"
+#  lookupDiv "x" "z" table;;
+- : int myErr = Ok 3
+# lookupDiv "x" "b" table;;
+- : int myErr = Err "Not Found"
+# lookupDiv "a" "z" table;;
+- : int myErr = Err "Not Found"
+
+【コード】
+type 'a myErr = Ok of 'a | Err of string
+let (>>=) x f =
+  match x with
+  | Err msg -> Err msg
+  | Ok y -> f y
+
+let rec eLookup key xs =
+  match xs with
+  | [] -> Err "Not Found"
+  | ((k,v)::rest) ->
+      if k = key then Ok v
+      else eLookup key rest;;
+
+let myDiv x y =
+  if y = 0 then Err "Div by Zero"
+  else Ok (x / y);;
+
+let lookupDiv kx ky t =
+  (eLookup kx t) >>= (fun x ->
+  (eLookup ky t) >>= (fun y ->
+    myDiv x y));;
+
+【考察】
+Bindがなにも定義しなければListモナドになることがわかった。モナドでつなげてもきちんと例外処理がされていることが確認できた。

@@ -7,6 +7,8 @@ sig
   val size : 'a t -> int
 end
 
+exception EmptyStack
+
 module Stack : LISTSTRUCT =
 struct
   type 'a t = 'a list
@@ -14,7 +16,7 @@ struct
 
   let pop xs =
     match xs with
-    | [x] -> (x, [])
+    | [] -> raise EmptyStack
     | y :: ys -> (y, ys)
 
   let push a xs = a :: xs

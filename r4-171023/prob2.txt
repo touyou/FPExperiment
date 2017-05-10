@@ -1,0 +1,56 @@
+171023 藤井陽介
+
+【動作例】
+# #use "prob2.ml";;
+type 'a m = 'a list
+val ( >>= ) : 'a list -> ('a -> 'b list) -> 'b list = <fun>
+val return : 'a -> 'a list = <fun>
+val guard : bool -> unit list = <fun>
+val numa : int list = [0; 1; 2; 3; 4; 5; 6; 7; 8; 9]
+val nums : int list = [1; 2; 3; 4; 5; 6; 7; 8; 9]
+val nosame : 'a -> 'a -> 'a -> 'a -> 'a -> bool = <fun>
+val bans : (int * int * int * int * int) list = [(8, 7, 1, 5, 4)]
+val filter : ('a -> bool) -> 'a list -> 'a list = <fun>
+val sendmoremoney :
+  (int * int * int * int * int * int * int * int * int * int * int *
+   int * int)
+  list = [(9, 5, 6, 7, 1, 0, 8, 5, 1, 0, 6, 5, 2)]
+
+【コード】
+type 'a m = 'a list;;
+let (>>=) x f = List.concat (List.map f x);;
+let return x = [x];;
+let guard b = if b then return () else [];;
+
+let numa = [0;1;2;3;4;5;6;7;8;9];;
+let nums = [1;2;3;4;5;6;7;8;9];;
+let nosame a b c d e = a != b && a != c && a != d && a != e && b != c && b != d && b != e && c != d && c != e && d!= e;;
+let bans = numa >>= (fun a ->
+           numa >>= (fun b ->
+           numa >>= (fun c ->
+           numa >>= (fun d ->
+           numa >>= (fun e ->
+  (guard (((a*100+b*11)*2 = c*1000+b*100+d*10+e) && a != 0 && c != 0 && (nosame a b c d e))) >>= (fun _ ->
+    return (a, b, c, d, e)))))));;
+
+(* send+more=money *)
+let rec filter f arr =
+  match arr with
+  | [] -> []
+  | x :: xs -> if f x then x :: filter f xs else filter f xs;;
+
+let sendmoremoney =
+  nums >>= (fun s ->
+  (filter (fun x -> x != s) nums) >>= (fun m ->
+  (filter (fun x -> x != s && x != m) numa) >>= (fun e ->
+  (filter (fun x -> x != s && x != m && x != e) numa) >>= (fun n ->
+  (filter (fun x -> x != s && x != m && x != e && x != n) numa) >>= (fun d ->
+  (filter (fun x -> x != s && x != m && x != e && x != n && x != d) numa) >>= (fun o ->
+  (filter (fun x -> x != s && x != m && x != e && x != n && x != d && x != o) numa) >>= (fun r ->
+  (filter (fun x -> x != s && x != m && x != e && x != n && x != d && x != o && x != r) numa) >>= (fun y ->
+  (guard (s*1000+e*101+n*10+d+m*1000+o*100+r*10=m*10000+o*1000+n*100+e*10+y)) >>= (fun _ ->
+    return (s,e,n,d,m,o,r,e,m,o,n,e,y))))))))));;
+
+【考察】
+今回のコードでは実行の約1秒ほどかかった。一度フィルターして消したものをもう一度フィルターしなおしてしまっているのでリストモナドではなく、候補リストを繋げられるモナドを作成すればさらに高速化できそう。
+オーダーとしてはO(10^n)からフィルターを使うことで試行回数がO(9!)に減り、フィルター部分にO(10n)かかっているのでO(10!n)ほどとかんがえられる。

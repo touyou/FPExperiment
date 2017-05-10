@@ -91,14 +91,14 @@ module Multiset2 : MULTISET2 =
       | Leaf -> tr
       | Node (y, l, r) ->
           match T.compare x y with
-          | LT -> Node (y, l, (remove x r))
+          | GT -> Node (y, l, (remove x r))
           | EQ ->
               if l = Leaf then r
               else if r = Leaf then l
               else
                 let min_d = search_min r in
                 Node (min_d, l, (delete_min r))
-          | GT -> Node (y, (remove x l), r)
+          | LT -> Node (y, (remove x l), r)
 
     let rec count_sub x tr n =
       match tr with

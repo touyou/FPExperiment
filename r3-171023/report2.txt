@@ -1,0 +1,57 @@
+171023 藤井陽介
+
+【実行例】
+# let s = Stack.push 1 (Stack.push 2 (Stack.push 3 Stack.empty));;
+val s : int Stack.t = <abstr>
+# Stack.pop s;;
+- : int * int Stack.t = (1, <abstr>)
+# let (x, ns) = Stack.pop s;;
+val x : int = 1
+val ns : int Stack.t = <abstr>
+# let (y, nns) = Stack.pop ns;;
+val y : int = 2
+val nns : int Stack.t = <abstr>
+# Stack.size s;;
+- : int = 3
+# Stack.size ns;;
+- : int = 2
+# Stack.size nns;;
+- : int = 1
+# Stack.pop Stack.empty;;
+Exception: EmptyStack.
+# Stack.size Stack.empty;;
+- : int = 0
+
+【コード】
+module type LISTSTRUCT =
+sig
+  type 'a t
+  val pop : 'a t -> ('a * 'a t)
+  val push : 'a -> 'a t -> 'a t
+  val empty : 'a t
+  val size : 'a t -> int
+end
+
+exception EmptyStack
+
+module Stack : LISTSTRUCT =
+struct
+  type 'a t = 'a list
+  let empty = []
+
+  let pop xs =
+    match xs with
+    | [] -> raise EmptyStack
+    | y :: ys -> (y, ys)
+
+  let push a xs = a :: xs
+
+  let rec size_sub xs n =
+    match xs with
+    | [] -> n
+    | y :: ys -> size_sub ys (n+1)
+  let size xs = size_sub xs 0
+end
+
+【考察】
+空のスタックからpopするときにはエラーを返すようにした。signatureによってぐっと関数を作成しやすくなると感じた（OCamlで普段明記しない型を書くことになるので）

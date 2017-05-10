@@ -1,0 +1,54 @@
+171023 藤井陽介
+
+【動作例】
+# #use "prob3.ml";;
+type 'a m = 'a * string
+val ( >>= ) : 'a m -> ('a -> 'b m) -> 'b * string = <fun>
+val return : 'a -> 'a * string = <fun>
+val writer : string -> unit * string = <fun>
+val msg : int -> string = <fun>
+val fib : int -> int m = <fun>
+Fib(4)
+Fib(2)
+Fib(0)
+Fib(1)
+Fib(3)
+Fib(1)
+Fib(2)
+Fib(0)
+Fib(1)
+- : unit = ()
+
+【コード】
+type 'a m = 'a * string
+
+(** (>>=) : 'a m -> ('a -> 'b m) -> 'b m *)
+let (>>=) (x : 'a m) (f : 'a -> 'b m) =
+  let (v, str) = x in
+  let (newv, nstr) = f v in
+  (newv, str ^ nstr)
+
+(** return : 'a -> 'a m *)
+let return (x : 'a) = (x, "")
+
+(** writer : string -> unit m *)
+let writer (m : string) = ((), m)
+
+let msg n = ("Fib(" ^ (string_of_int n) ^")\n")
+
+(** fib : int -> int m *)
+let rec fib n =
+  (writer (msg n)) >>= (fun _ ->
+  if n <= 1 then
+    return n
+  else
+    (fib (n-2)) >>= (fun x ->
+    (fib (n-1)) >>= (fun y ->
+    return (x + y))))
+
+let _ =
+  let (_, m) = fib 4 in
+  print_string m
+
+【考察】
+モナド自身は特別な処理を行っているわけではないことが実感できた。どうしてもstringでの処理が入ってしまうため、完全に型推論を型変数にあわせるという処理はできなかった。
