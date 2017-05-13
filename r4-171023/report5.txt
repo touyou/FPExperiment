@@ -1,3 +1,70 @@
+171023 藤井陽介
+
+【動作例】
+# #use "report5.ml";;
+module type SEMIRING =
+  sig
+    type t
+    val add : t -> t -> t
+    val mul : t -> t -> t
+    val unit : t
+    val zero : t
+    val to_string : t -> string
+  end
+module type MATRIX =
+  functor (T : SEMIRING) ->
+    sig
+      type t
+      val empty : t
+      val add : T.t list -> t -> t
+      val mul : t -> t -> t
+      val print_mat : t -> unit
+    end
+exception TypeError
+module Matrix : MATRIX
+module BooleanSemiring : SEMIRING
+type infint = Num of int | Inf
+module IntSemiring : SEMIRING
+module BooleanMatrix :
+  sig
+    type t = Matrix(BooleanSemiring).t
+    val empty : t
+    val add : BooleanSemiring.t list -> t -> t
+    val mul : t -> t -> t
+    val print_mat : t -> unit
+  end
+module IntMatrix :
+  sig
+    type t = Matrix(IntSemiring).t
+    val empty : t
+    val add : IntSemiring.t list -> t -> t
+    val mul : t -> t -> t
+    val print_mat : t -> unit
+  end
+val x : BooleanMatrix.t = <abstr>
+val y : BooleanMatrix.t = <abstr>
+|true | false |
+|true | false |
+- : unit = ()
+|true | false |
+|false | false |
+- : unit = ()
+|true | false |
+|true | false |
+- : unit = ()
+val z : IntMatrix.t = <abstr>
+val a : IntMatrix.t = <abstr>
+|1 | 1 |
+|1 | 1 |
+- : unit = ()
+|1 | inf |
+|inf | 1 |
+- : unit = ()
+|2 | 2 |
+|2 | 2 |
+- : unit = ()
+
+【コード】
 module type SEMIRING =
   sig
     type t
@@ -133,3 +200,8 @@ let a = IntMatrix.add [IntSemiring.unit; IntSemiring.zero] (IntMatrix.add [IntSe
 IntMatrix.print_mat z;;
 IntMatrix.print_mat a;;
 IntMatrix.print_mat (IntMatrix.mul z a);;
+
+
+【考察】
+上手く型を隠蔽し、実際の数字などが使えないようになった。整数のほうのzeroが0だと計算がうまくいかないため∞にしなければいけないというところに気付くのが遅れた。
+さらに隠蔽された型への変換関数などを実装するとなお使いやすくなると思う。使っているとメリットが感じられにくいが型が隠蔽されることで型のミスマッチを事前に防ぐことが出来、コンパイラなどの実装において有用だと感じた。
