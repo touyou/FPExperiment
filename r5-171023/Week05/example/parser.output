@@ -1,0 +1,285 @@
+   0  $accept : %entry% $end
+
+   1  toplevel : expr SEMISEMI
+
+   2  expr : IF expr THEN expr ELSE expr
+   3       | arith_expr EQ arith_expr
+   4       | arith_expr LT arith_expr
+   5       | arith_expr
+
+   6  arith_expr : arith_expr PLUS factor_expr
+   7             | factor_expr
+
+   8  factor_expr : atomic_expr
+
+   9  atomic_expr : INT
+  10              | BOOL
+  11              | ID
+  12              | LPAR expr RPAR
+
+  13  %entry% : '\001' toplevel
+
+state 0
+	$accept : . %entry% $end  (0)
+
+	'\001'  shift 1
+	.  error
+
+	%entry%  goto 2
+
+
+state 1
+	%entry% : '\001' . toplevel  (13)
+
+	INT  shift 3
+	BOOL  shift 4
+	ID  shift 5
+	IF  shift 6
+	LPAR  shift 7
+	.  error
+
+	toplevel  goto 8
+	expr  goto 9
+	arith_expr  goto 10
+	factor_expr  goto 11
+	atomic_expr  goto 12
+
+
+state 2
+	$accept : %entry% . $end  (0)
+
+	$end  accept
+
+
+state 3
+	atomic_expr : INT .  (9)
+
+	.  reduce 9
+
+
+state 4
+	atomic_expr : BOOL .  (10)
+
+	.  reduce 10
+
+
+state 5
+	atomic_expr : ID .  (11)
+
+	.  reduce 11
+
+
+state 6
+	expr : IF . expr THEN expr ELSE expr  (2)
+
+	INT  shift 3
+	BOOL  shift 4
+	ID  shift 5
+	IF  shift 6
+	LPAR  shift 7
+	.  error
+
+	expr  goto 13
+	arith_expr  goto 10
+	factor_expr  goto 11
+	atomic_expr  goto 12
+
+
+state 7
+	atomic_expr : LPAR . expr RPAR  (12)
+
+	INT  shift 3
+	BOOL  shift 4
+	ID  shift 5
+	IF  shift 6
+	LPAR  shift 7
+	.  error
+
+	expr  goto 14
+	arith_expr  goto 10
+	factor_expr  goto 11
+	atomic_expr  goto 12
+
+
+state 8
+	%entry% : '\001' toplevel .  (13)
+
+	.  reduce 13
+
+
+state 9
+	toplevel : expr . SEMISEMI  (1)
+
+	SEMISEMI  shift 15
+	.  error
+
+
+state 10
+	expr : arith_expr . EQ arith_expr  (3)
+	expr : arith_expr . LT arith_expr  (4)
+	expr : arith_expr .  (5)
+	arith_expr : arith_expr . PLUS factor_expr  (6)
+
+	PLUS  shift 16
+	EQ  shift 17
+	LT  shift 18
+	THEN  reduce 5
+	ELSE  reduce 5
+	RPAR  reduce 5
+	SEMISEMI  reduce 5
+
+
+state 11
+	arith_expr : factor_expr .  (7)
+
+	.  reduce 7
+
+
+state 12
+	factor_expr : atomic_expr .  (8)
+
+	.  reduce 8
+
+
+state 13
+	expr : IF expr . THEN expr ELSE expr  (2)
+
+	THEN  shift 19
+	.  error
+
+
+state 14
+	atomic_expr : LPAR expr . RPAR  (12)
+
+	RPAR  shift 20
+	.  error
+
+
+state 15
+	toplevel : expr SEMISEMI .  (1)
+
+	.  reduce 1
+
+
+state 16
+	arith_expr : arith_expr PLUS . factor_expr  (6)
+
+	INT  shift 3
+	BOOL  shift 4
+	ID  shift 5
+	LPAR  shift 7
+	.  error
+
+	factor_expr  goto 21
+	atomic_expr  goto 12
+
+
+state 17
+	expr : arith_expr EQ . arith_expr  (3)
+
+	INT  shift 3
+	BOOL  shift 4
+	ID  shift 5
+	LPAR  shift 7
+	.  error
+
+	arith_expr  goto 22
+	factor_expr  goto 11
+	atomic_expr  goto 12
+
+
+state 18
+	expr : arith_expr LT . arith_expr  (4)
+
+	INT  shift 3
+	BOOL  shift 4
+	ID  shift 5
+	LPAR  shift 7
+	.  error
+
+	arith_expr  goto 23
+	factor_expr  goto 11
+	atomic_expr  goto 12
+
+
+state 19
+	expr : IF expr THEN . expr ELSE expr  (2)
+
+	INT  shift 3
+	BOOL  shift 4
+	ID  shift 5
+	IF  shift 6
+	LPAR  shift 7
+	.  error
+
+	expr  goto 24
+	arith_expr  goto 10
+	factor_expr  goto 11
+	atomic_expr  goto 12
+
+
+state 20
+	atomic_expr : LPAR expr RPAR .  (12)
+
+	.  reduce 12
+
+
+state 21
+	arith_expr : arith_expr PLUS factor_expr .  (6)
+
+	.  reduce 6
+
+
+state 22
+	expr : arith_expr EQ arith_expr .  (3)
+	arith_expr : arith_expr . PLUS factor_expr  (6)
+
+	PLUS  shift 16
+	THEN  reduce 3
+	ELSE  reduce 3
+	RPAR  reduce 3
+	SEMISEMI  reduce 3
+
+
+state 23
+	expr : arith_expr LT arith_expr .  (4)
+	arith_expr : arith_expr . PLUS factor_expr  (6)
+
+	PLUS  shift 16
+	THEN  reduce 4
+	ELSE  reduce 4
+	RPAR  reduce 4
+	SEMISEMI  reduce 4
+
+
+state 24
+	expr : IF expr THEN expr . ELSE expr  (2)
+
+	ELSE  shift 25
+	.  error
+
+
+state 25
+	expr : IF expr THEN expr ELSE . expr  (2)
+
+	INT  shift 3
+	BOOL  shift 4
+	ID  shift 5
+	IF  shift 6
+	LPAR  shift 7
+	.  error
+
+	expr  goto 26
+	arith_expr  goto 10
+	factor_expr  goto 11
+	atomic_expr  goto 12
+
+
+state 26
+	expr : IF expr THEN expr ELSE expr .  (2)
+
+	.  reduce 2
+
+
+15 terminals, 7 nonterminals
+14 grammar rules, 27 states
