@@ -1,0 +1,36 @@
+171023 藤井陽介
+
+【動作例】
+# 9 - 4;;
+- = 5
+# 16 / 3;;
+- = 5
+# 7 * 2;;
+- = 14
+# 17 / 0;;
+Fatal error: exception Eval.EvalErr
+
+【コード】
+（抜粋）
+  | ESub (e1,e2) ->
+      let v1 = eval_expr env e1 in
+      let v2 = eval_expr env e2 in
+      (match v1, v2 with
+      | VInt i1, VInt i2 -> VInt (i1 - i2)
+      | _ -> raise EvalErr)
+  | EMul (e1,e2) ->
+      let v1 = eval_expr env e1 in
+      let v2 = eval_expr env e2 in
+      (match v1, v2 with
+      | VInt i1, VInt i2 -> VInt (i1 * i2)
+      | _ -> raise EvalErr)
+  | EDiv (e1,e2) ->
+      let v1 = eval_expr env e1 in
+      let v2 = eval_expr env e2 in
+      (match v1, v2 with
+      | VInt i1, VInt i2 -> if i2 = 0 then raise EvalErr else VInt (i1 / i2)
+      | _ -> raise EvalErr)
+
+【考察】
+EAddとほぼ変わらない構造で、両方ともVInt出会ったときのみ結果を返すようにできた。
+raiseで行っているために0割でプログラムが終了した。

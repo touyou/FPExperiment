@@ -26,6 +26,7 @@ toplevel:
 expr:
   | LET var EQ expr IN expr     { ELet($2,$4,$6) }
   | IF expr THEN expr ELSE expr { EIf($2,$4,$6) }
+  // 問４
   | expr AND expr               { EAnd($1,$3) }
   | expr OR expr                { EOr($1,$3) }
   | arith_expr EQ arith_expr    { EEq($1,$3) }

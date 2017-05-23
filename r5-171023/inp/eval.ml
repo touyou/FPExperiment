@@ -1,4 +1,4 @@
-open Sytax
+open Syntax
 
 exception Unbound
 
@@ -21,19 +21,17 @@ let rec eval_expr env e =
         lookup x env
       with
       | Unbound -> raise EvalErr)
+  (* 問３の範囲 *)
   | ELet (x,e1,e2) ->
       let v1 = eval_expr env e1 in
       eval_expr (extend x v1 env) e2
-  | ELet (x,e) ->
-      let v = eval_expr env e in
-      let newenv = extend x v env in
-      (newenv, v)
   | EAdd (e1,e2) ->
       let v1 = eval_expr env e1 in
       let v2 = eval_expr env e2 in
       (match v1, v2 with
       | VInt i1, VInt i2 -> VInt (i1 + i2)
       | _ -> raise EvalErr)
+  (* 問２の範囲 *)
   | ESub (e1,e2) ->
       let v1 = eval_expr env e1 in
       let v2 = eval_expr env e2 in
@@ -64,6 +62,7 @@ let rec eval_expr env e =
       (match v1, v2 with
       | VInt i1, VInt i2 -> VBool (i1 < i2)
       | _ -> raise EvalErr)
+  (* 問４の範囲  *)
   | EAnd (e1,e2) ->
       let v1 = eval_expr env e1 in
       let v2 = eval_expr env e2 in
@@ -85,6 +84,8 @@ let rec eval_expr env e =
 let rec eval_command env c =
   match c with
   | CExp e -> ("-", env, eval_expr env e)
+  (* 問３の範囲 *)
   | CDecl (x,e) ->
-      let (newenv, v) = eval_expr env e in
+      let v = eval_expr env e in
+      let newenv = extend x v env in
       (x, newenv, v)

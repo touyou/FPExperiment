@@ -1,0 +1,33 @@
+171023 藤井陽介
+
+$ ocamlyacc parser.mly
+$ ocamllex lexer.mll
+30 states, 1692 transitions, table size 6948 bytes
+$ ocamlc -c syntax.ml
+$ ocamlc -c parser.mli
+$ ocamlc -c parser.ml
+$ ocamlc -c lexer.ml
+$ ocamlc -c example.ml
+$ ocamlc -o example syntax.cmo parser.cmo lexer.cmo example.cmo
+$ echo "if x < 0 then 0 else x;;" | ./example
+EIf (ELt (x,0),0,x)
+$ ocamlyacc -v parser.mly
+
+parser.mlyのEQの右とLTの左をexprに変更したところ
+
+$ ocamlyacc parser.mly
+2 shift/reduce conflicts.
+
+と出た。さらに両側をexprに変えると
+
+$ ocamlyacc -v parser.mly
+6 shift/reduce conflicts.
+
+とさらに増えることがわかった。
+--strictオプションをつけると
+
+$ ocamlyacc -v --strict parser.mly
+6 shift/reduce conflicts.
+ocamlyacc: the grammar has conflicts, but --strict was specified
+
+とメッセージが変わった。

@@ -3,8 +3,8 @@
    1  toplevel : expr SEMISEMI
 
    2  expr : IF expr THEN expr ELSE expr
-   3       | arith_expr EQ arith_expr
-   4       | arith_expr LT arith_expr
+   3       | expr EQ expr
+   4       | expr LT expr
    5       | arith_expr
 
    6  arith_expr : arith_expr PLUS factor_expr
@@ -109,20 +109,22 @@ state 8
 
 state 9
 	toplevel : expr . SEMISEMI  (1)
+	expr : expr . EQ expr  (3)
+	expr : expr . LT expr  (4)
 
-	SEMISEMI  shift 15
+	EQ  shift 15
+	LT  shift 16
+	SEMISEMI  shift 17
 	.  error
 
 
 state 10
-	expr : arith_expr . EQ arith_expr  (3)
-	expr : arith_expr . LT arith_expr  (4)
 	expr : arith_expr .  (5)
 	arith_expr : arith_expr . PLUS factor_expr  (6)
 
-	PLUS  shift 16
-	EQ  shift 17
-	LT  shift 18
+	PLUS  shift 18
+	EQ  reduce 5
+	LT  reduce 5
 	THEN  reduce 5
 	ELSE  reduce 5
 	RPAR  reduce 5
@@ -143,25 +145,65 @@ state 12
 
 state 13
 	expr : IF expr . THEN expr ELSE expr  (2)
+	expr : expr . EQ expr  (3)
+	expr : expr . LT expr  (4)
 
+	EQ  shift 15
+	LT  shift 16
 	THEN  shift 19
 	.  error
 
 
 state 14
+	expr : expr . EQ expr  (3)
+	expr : expr . LT expr  (4)
 	atomic_expr : LPAR expr . RPAR  (12)
 
+	EQ  shift 15
+	LT  shift 16
 	RPAR  shift 20
 	.  error
 
 
 state 15
+	expr : expr EQ . expr  (3)
+
+	INT  shift 3
+	BOOL  shift 4
+	ID  shift 5
+	IF  shift 6
+	LPAR  shift 7
+	.  error
+
+	expr  goto 21
+	arith_expr  goto 10
+	factor_expr  goto 11
+	atomic_expr  goto 12
+
+
+state 16
+	expr : expr LT . expr  (4)
+
+	INT  shift 3
+	BOOL  shift 4
+	ID  shift 5
+	IF  shift 6
+	LPAR  shift 7
+	.  error
+
+	expr  goto 22
+	arith_expr  goto 10
+	factor_expr  goto 11
+	atomic_expr  goto 12
+
+
+state 17
 	toplevel : expr SEMISEMI .  (1)
 
 	.  reduce 1
 
 
-state 16
+state 18
 	arith_expr : arith_expr PLUS . factor_expr  (6)
 
 	INT  shift 3
@@ -170,35 +212,7 @@ state 16
 	LPAR  shift 7
 	.  error
 
-	factor_expr  goto 21
-	atomic_expr  goto 12
-
-
-state 17
-	expr : arith_expr EQ . arith_expr  (3)
-
-	INT  shift 3
-	BOOL  shift 4
-	ID  shift 5
-	LPAR  shift 7
-	.  error
-
-	arith_expr  goto 22
-	factor_expr  goto 11
-	atomic_expr  goto 12
-
-
-state 18
-	expr : arith_expr LT . arith_expr  (4)
-
-	INT  shift 3
-	BOOL  shift 4
-	ID  shift 5
-	LPAR  shift 7
-	.  error
-
-	arith_expr  goto 23
-	factor_expr  goto 11
+	factor_expr  goto 23
 	atomic_expr  goto 12
 
 
@@ -224,37 +238,49 @@ state 20
 	.  reduce 12
 
 
+21: shift/reduce conflict (shift 15, reduce 3) on EQ
+21: shift/reduce conflict (shift 16, reduce 3) on LT
 state 21
-	arith_expr : arith_expr PLUS factor_expr .  (6)
+	expr : expr . EQ expr  (3)
+	expr : expr EQ expr .  (3)
+	expr : expr . LT expr  (4)
 
-	.  reduce 6
-
-
-state 22
-	expr : arith_expr EQ arith_expr .  (3)
-	arith_expr : arith_expr . PLUS factor_expr  (6)
-
-	PLUS  shift 16
+	EQ  shift 15
+	LT  shift 16
 	THEN  reduce 3
 	ELSE  reduce 3
 	RPAR  reduce 3
 	SEMISEMI  reduce 3
 
 
-state 23
-	expr : arith_expr LT arith_expr .  (4)
-	arith_expr : arith_expr . PLUS factor_expr  (6)
+22: shift/reduce conflict (shift 15, reduce 4) on EQ
+22: shift/reduce conflict (shift 16, reduce 4) on LT
+state 22
+	expr : expr . EQ expr  (3)
+	expr : expr . LT expr  (4)
+	expr : expr LT expr .  (4)
 
-	PLUS  shift 16
+	EQ  shift 15
+	LT  shift 16
 	THEN  reduce 4
 	ELSE  reduce 4
 	RPAR  reduce 4
 	SEMISEMI  reduce 4
 
 
+state 23
+	arith_expr : arith_expr PLUS factor_expr .  (6)
+
+	.  reduce 6
+
+
 state 24
 	expr : IF expr THEN expr . ELSE expr  (2)
+	expr : expr . EQ expr  (3)
+	expr : expr . LT expr  (4)
 
+	EQ  shift 15
+	LT  shift 16
 	ELSE  shift 25
 	.  error
 
@@ -275,10 +301,24 @@ state 25
 	atomic_expr  goto 12
 
 
+26: shift/reduce conflict (shift 15, reduce 2) on EQ
+26: shift/reduce conflict (shift 16, reduce 2) on LT
 state 26
 	expr : IF expr THEN expr ELSE expr .  (2)
+	expr : expr . EQ expr  (3)
+	expr : expr . LT expr  (4)
 
-	.  reduce 2
+	EQ  shift 15
+	LT  shift 16
+	THEN  reduce 2
+	ELSE  reduce 2
+	RPAR  reduce 2
+	SEMISEMI  reduce 2
+
+
+State 21 contains 2 shift/reduce conflicts.
+State 22 contains 2 shift/reduce conflicts.
+State 26 contains 2 shift/reduce conflicts.
 
 
 15 terminals, 7 nonterminals

@@ -1,0 +1,43 @@
+171023 藤井陽介
+
+【動作例】
+# 1 = 2 && 3 < 4;;
+- = false
+# 1 = 1 && 4 < 5;;
+- = true
+# 1 = 2 || true;;
+- = true
+# 1 && 2 = 3;;
+Fatal error: exception Eval.EvalErr
+
+【コード】
+parser.mly内
+| expr AND expr               { EAnd($1,$3) }
+| expr OR expr                { EOr($1,$3) }
+
+syntax.ml内
+| EAnd       of expr * expr
+| EOr        of expr * expr
+
+lexer.mll内
+(* 問4 *)
+| "&&"         { Parser.AND }
+| "||"         { Parser.OR }
+
+eval.ml内
+(* 問４の範囲  *)
+| EAnd (e1,e2) ->
+    let v1 = eval_expr env e1 in
+    let v2 = eval_expr env e2 in
+    (match v1, v2 with
+    | VBool b1, VBool b2 -> VBool (b1 && b2)
+    | _ -> raise EvalErr)
+| EOr (e1,e2) ->
+    let v1 = eval_expr env e1 in
+    let v2 = eval_expr env e2 in
+    (match v1, v2 with
+    | VBool b1, VBool b2 -> VBool (b1 || b2)
+    | _ -> raise EvalErr)
+
+【考察】
+こちらも特にこまる事なく直感的に実装できた。ANDとORは真偽値に対しての演算ではあるが、その子要素はEQやLTになるためにexprにしている。これで問題なく想定通り真偽値のみをうけつけてそれ以外では例外を吐く実装となった。

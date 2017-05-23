@@ -1,0 +1,25 @@
+171023 藤井陽介
+
+【動作例】
+# let x = 0;;
+x = 0
+# x + 10;;
+- = 10
+# let y = 7 in x + y;;
+- = 7
+# y;;
+Fatal error: exception Eval.EvalErr
+
+【コード】
+eval.ml（抜粋）----
+  | ELet (x,e1,e2) ->
+      let v1 = eval_expr env e1 in
+      eval_expr (extend x v1 env) e2
+
+  | CDecl (x,e) ->
+      let v = eval_expr env e in
+      let newenv = extend x v env in
+      (x, newenv, v)
+
+【考察】
+let inの際はそのままELetに、letのみだとCDeclになるように実装されている。実装した行数は少ないが、しっかりと環境が正しいスコープで拡張されていることが確認できた。

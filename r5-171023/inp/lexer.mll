@@ -11,6 +11,7 @@ rule main = parse
 | "/"          { Parser.DIV }
 | "="          { Parser.EQ }
 | "<"          { Parser.LT }
+(* 問4 *)
 | "&&"         { Parser.AND }
 | "||"         { Parser.OR }
 | "let"        { Parser.LET }

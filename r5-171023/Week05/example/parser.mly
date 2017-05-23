@@ -22,8 +22,8 @@ toplevel:
 
 expr:
   | IF expr THEN expr ELSE expr { EIf($2,$4,$6) }
-  | arith_expr EQ arith_expr    { EEq($1,$3) }
-  | arith_expr LT arith_expr    { ELt($1,$3) }
+  | expr EQ expr    { EEq($1,$3) }
+  | expr LT expr    { ELt($1,$3) }
   | arith_expr                  { $1 } 
 ;
 
