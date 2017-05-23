@@ -1,7 +1,7 @@
 let digit = ['0'-'9']
 let space = ' ' | '\t' | '\r' | '\n'
-let alpha = ['a'-'z' 'A'-'Z' '_' ]
-let ident = alpha (alpha | digit)*
+let alpha = ['a'-'z' 'A'-'Z' '_' ] 
+let ident = alpha (alpha | digit)* 
 
 rule main = parse
 | space+       { main lexbuf }
@@ -11,9 +11,6 @@ rule main = parse
 | "/"          { Parser.DIV }
 | "="          { Parser.EQ }
 | "<"          { Parser.LT }
-(* 問4 *)
-| "&&"         { Parser.AND }
-| "||"         { Parser.OR }
 | "let"        { Parser.LET }
 | "in"         { Parser.IN }
 | "if"         { Parser.IF }
@@ -23,9 +20,8 @@ rule main = parse
 | "false"      { Parser.BOOL (false) }
 | "("          { Parser.LPAR }
 | ")"          { Parser.RPAR }
-| "fun"        { Parser.FUN }
+| "fun"        { Parser.FUN}
 | "->"         { Parser.ARROW }
-| "quit"       { Parser.QUIT }
 | ";;"         { Parser.SEMISEMI }
 | digit+ as n  { Parser.INT (int_of_string n) }
 | ident  as id { Parser.ID id }

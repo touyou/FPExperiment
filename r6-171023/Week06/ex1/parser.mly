@@ -4,40 +4,32 @@
 %}
 
 %token <int>    INT
-%token <bool>   BOOL
+%token <bool>   BOOL 
 %token <string> ID
-%token LET IN
-%token FUN ARROW
+%token LET IN				  
 %token PLUS TIMES MINUS DIV
 %token EQ LT
-%token AND OR
 %token IF THEN ELSE
-%token LPAR RPAR
+%token LPAR RPAR 
+%token FUN ARROW
 %token SEMISEMI
-%token QUIT
 
-
-%start toplevel
+%start toplevel 
 %type <Syntax.command> toplevel
-%%
+%% 
 
 toplevel:
   | expr SEMISEMI { CExp $1 }
   | LET var EQ expr SEMISEMI { CDecl ($2, $4) }
-  | QUIT SEMISEMI { CQuit }
 ;
 
 expr:
-  | expr expr                   { EApp($1, $2) }
   | LET var EQ expr IN expr     { ELet($2,$4,$6) }
-  | FUN var ARROW expr          { EFun($2, $4) }
   | IF expr THEN expr ELSE expr { EIf($2,$4,$6) }
-  // 問４
-  | expr AND expr               { EAnd($1,$3) }
-  | expr OR expr                { EOr($1,$3) }
+  | FUN var ARROW expr          { EFun($2,$4) }
   | arith_expr EQ arith_expr    { EEq($1,$3) }
   | arith_expr LT arith_expr    { ELt($1,$3) }
-  | arith_expr                  { $1 }
+  | arith_expr                  { $1 } 
 ;
 
 arith_expr:
@@ -47,10 +39,14 @@ arith_expr:
 ;
 
 factor_expr:
-  | factor_expr TIMES atomic_expr { EMul($1,$3) }
-  | factor_expr DIV atomic_expr   { EDiv($1,$3) }
-  | atomic_expr                   { $1 }
+  | factor_expr TIMES app_expr { EMul($1,$3) }
+  | factor_expr DIV app_expr   { EDiv($1,$3) }
+  | app_expr                   { $1 }
 ;
+
+app_expr:
+  | app_expr atomic_expr { EApp($1, $2) }
+  | atomic_expr          { $1 }
 
 atomic_expr:
   | INT            { EConstInt($1) }
@@ -58,7 +54,7 @@ atomic_expr:
   | ID             { EVar($1) }
   | LPAR expr RPAR { $2 }
 ;
-
+ 
 var:
   | ID { $1 }
 ;
