@@ -1,0 +1,57 @@
+171023 藤井陽介
+
+【動作例】
+# let rec hel = "hello";;
+Error = Unknown Syntax
+# x;;
+- = 10
+# y;;
+Error = Unbounded Value
+# 1 / 0;;
+Error = Divided by Zero
+# let x = y / 0;;
+Error = Unbounded Value
+# quit;;
+
+【コード】
+eval.ml内
+let rec eval_command env c =
+  match c with
+  | CExp e ->
+    (try
+      ("-", env, eval_expr env e)
+    with
+    | EvalType -> ("Error", env, VError "Type Mismatching")
+    | EvalUnbound -> ("Error", env, VError "Unbounded Value")
+    | EvalZeroDivision -> ("Error", env, VError "Divided by Zero"))
+  (* 問３の範囲 *)
+  | CDecl (x,e) ->
+    (try
+      let v = eval_expr env e in
+      let newenv = extend x v env in
+      (x, newenv, v)
+    with
+    | EvalType -> ("Error", env, VError "Type Mismatching")
+    | EvalUnbound -> ("Error", env, VError "Unbounded Value")
+    | EvalZeroDivision -> ("Error", env, VError "Divided by Zero"))
+  | CQuit -> exit 0
+
+main.ml内
+let rec read_eval_print env =
+  print_string "# ";
+  flush stdout;
+  try
+    let cmd = Parser.toplevel Lexer.main (Lexing.from_channel stdin) in
+    let (id, newenv, v) = eval_command env cmd in
+      (Printf.printf "%s = " id;
+       print_value v;
+       print_newline ();
+       read_eval_print newenv)
+  with
+  | Parsing.Parse_error ->
+    (Printf.printf "Error = Unknown Syntax";
+     print_newline ();
+     read_eval_print env)
+
+【考察】
+エラーを再帰呼出しの途中から伝搬させるのは型が面倒なので適切なレベルでtry withを使うことで対処した。lexerからはLexer独自のエラーを呼び出すようにしていたがParserにそれが渡ってしまってエラーが変わるのでひとまずParsing.Parse_errorを受け取るようにしている。またこれらの改造によってプログラムを終了できなくなったのでquit;;を実装した。
