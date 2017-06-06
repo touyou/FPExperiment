@@ -1,0 +1,33 @@
+171023 藤井陽介
+
+【実行例】
+# (fun x -> x + 2) 3;;
+- = 5
+# fun y -> y + 10;;
+- = VFun(y)
+# let x = fun y -> y + 100;;
+x = VFun(y)
+# x 300;;
+- = 400
+
+【コード】
+eval.ml----
+| EFun (x, e) -> VFun (x, e, env)
+| EApp (e1, e2) ->
+    let v1 = eval_expr env e1 in
+    let v2 = eval_expr env e2 in
+    (match v1 with
+    | VFun(x,e,oenv) ->
+        eval_expr (extend x v2 oenv) e
+
+syntax.ml----
+type value =
+  | VInt  of int
+  | VBool of bool
+  | VFun of name * expr * env
+  | VRecFun of name * name * expr * env
+  | VError of string
+and env = (name * value) list
+
+【考察】
+相互再帰的な型のためにandをつかった。また関数としてはクロージャーを使う方法を使った。評価ではまず環境を組みにしたものをつくり、それをEAppで評価して計算を行った。

@@ -1,0 +1,41 @@
+171023 藤井陽介
+
+【実行例】
+# let rec fib a = if a=1 || a=0 then 1 else (fib (a-1) + fib (a-2));;
+fib = VRecFun(fib,a)
+# fib 5;;
+- = 8
+# fib 20;;
+- = 10946
+# let rec loop n = if n=0 then 777 else loop (n - 1) in loop 10;;
+- = 777
+
+【コード】
+| ELetRec (f,x,e1,e2) ->
+    let env' = extend f (VRecFun(f,x,e1,env)) env in
+    eval_expr env' e2
+
+| EApp (e1, e2) ->
+    let v1 = eval_expr env e1 in
+    let v2 = eval_expr env e2 in
+    (match v1 with
+    | VFun(x,e,oenv) ->
+        eval_expr (extend x v2 oenv) e
+    | VRecFun(f,x,e,oenv) ->
+        let env' = extend x v2 (extend f (VRecFun(f,x,e,oenv)) oenv) in
+        eval_expr env' e
+    | _ -> raise EvalUnbound)
+
+
+| CRecDecl (f,x,e) ->
+(try
+  let v = VRecFun(f,x,e,env) in
+  let newenv = extend f v env in
+  (f, newenv, v)
+with
+| EvalType -> ("-", env, VError "Type Mismatching")
+| EvalUnbound -> ("-", env, VError "Unbounded Value")
+| EvalZeroDivision -> ("-", env, VError "Divided by Zero"))
+
+【考察】
+再帰は環境を拡張する形で実装した。VRecFunを宣言した環境下でin以降の式を評価することで再帰を実現している。評価の際には宣言時の環境にもう一度関数と引数の値のみ拡張した環境下でin以前を評価するという形になっている。

@@ -6,7 +6,7 @@
 %token <int>    INT
 %token <bool>   BOOL
 %token <string> ID
-%token LET IN REC
+%token LET IN REC AND
 %token FUN ARROW
 %token PLUS TIMES MINUS DIV
 %token EQ LT
@@ -25,13 +25,17 @@
 toplevel:
   | expr SEMISEMI { CExp $1 }
   | LET var EQ expr SEMISEMI { CDecl ($2, $4) }
-  | LET REC var var EQ expr SEMISEMI { CRecDecl ($3,$4,$6) }
+  | LET REC let_and_decls SEMISEMI { CRecDecl ($3) }
   | QUIT SEMISEMI { CQuit }
 ;
 
+let_and_decls:
+  | var var EQ expr AND let_and_decls { ($1,$2,$4) :: $6 }
+  | var var EQ expr                   { [($1,$2,$4)] }
+
 expr:
   | LET var EQ expr IN expr     { ELet($2,$4,$6) }
-  | LET REC var var EQ expr IN expr SEMISEMI { ELetRec($3,$4,$6,$8) }
+  | LET REC let_and_decls IN expr { ELetRec($3,$5) }
   | FUN var ARROW expr          { EFun($2, $4) }
   | IF expr THEN expr ELSE expr { EIf($2,$4,$6) }
   | value_expr                  { $1 }

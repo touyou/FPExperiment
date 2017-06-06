@@ -1,0 +1,45 @@
+fun f -> fun g -> fun x -> f (g x)
+
+TySyntax.TyFun (TySyntax.TyFun ())
+
+型環境 {f = α, g = β, x = γ}
+gはβ型, xはγ型, 制約{β = γ->Δ}
+fはα型, (g x)はΔ型, 制約{α = Δ->θ, β = γ->Δ}
+
+α a
+β b
+γ c
+Δ d
+θ e
+
+a = (d -> e)
+b = (c -> d)
+
+(d -> e) -> (c -> d) -> c -> e
+
+# let c1 = (a, TySyntax.TyFun (d,e));;
+val c1 : TySyntax.ty * TySyntax.ty =
+  (TySyntax.TyVar <abstr>,
+   TySyntax.TyFun (TySyntax.TyVar <abstr>, TySyntax.TyVar <abstr>))
+# let c2 = (b, TySyntax.TyFun (c,d));;
+val c2 : TySyntax.ty * TySyntax.ty =
+  (TySyntax.TyVar <abstr>,
+   TySyntax.TyFun (TySyntax.TyVar <abstr>, TySyntax.TyVar <abstr>))
+# let const = c1 :: c2 :: [];;
+val const : (TySyntax.ty * TySyntax.ty) list =
+  [(TySyntax.TyVar <abstr>,
+    TySyntax.TyFun (TySyntax.TyVar <abstr>, TySyntax.TyVar <abstr>));
+   (TySyntax.TyVar <abstr>,
+    TySyntax.TyFun (TySyntax.TyVar <abstr>, TySyntax.TyVar <abstr>))]
+# let u = ConstraintSolver.unify const;;
+val u : ConstraintSolver.subst = <abstr>
+# TySyntax.print_type (ConstraintSolver.ty_subst u a);;
+('a10 -> 'a11)- : unit = ()
+# TySyntax.print_type (ConstraintSolver.ty_subst u b);;
+('a9 -> 'a10)- : unit = ()
+# TySyntax.print_type (ConstraintSolver.ty_subst u c);;
+'a9- : unit = ()
+# TySyntax.print_type (ConstraintSolver.ty_subst u d);;
+'a10- : unit = ()
+# TySyntax.print_type (ConstraintSolver.ty_subst u e);;
+'a11- : unit = ()

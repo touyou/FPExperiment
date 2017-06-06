@@ -15,31 +15,31 @@ type expr =
   | EOr        of expr * expr
   | EIf        of expr * expr * expr
   | ELet       of name * expr * expr
-  | ELetRec    of name * name * expr * expr
+  | ELetRec    of (name * name * expr) list * expr
   | EApp       of expr * expr
 
 type value =
   | VInt  of int
   | VBool of bool
   | VFun of name * expr * env
-  | VRecFun of name * name * expr * env
+  | VRecFun of int * (name * name * expr) list * env
   | VError of string
 and env = (name * value) list
 
 type command =
   | CExp  of expr
   | CDecl of name * expr
-  | CRecDecl of name * name * expr
+  | CRecDecl of (name * name * expr) list
   | CQuit
 
 let print_name = print_string
 
 let print_value v =
   match v with
-  | VInt i  -> print_string "VInt("; print_int i; print_string ")"
-  | VBool b -> print_string "VBool("; print_string (string_of_bool b); print_string ")"
+  | VInt i  -> print_int i
+  | VBool b -> print_string (string_of_bool b)
   | VFun (x, e, env) -> print_string "VFun("; print_name x; print_string ")"
-  | VRecFun (f, x, e, env) -> print_string "VRecFun("; print_name f; print_string ","; print_name x; print_string ")"
+  | VRecFun (num, reclist, env) -> print_string "VRecFun"
   | VError s -> print_string "Error: "; print_string s
 let rec print_expr e =
   match e with
@@ -57,15 +57,9 @@ let rec print_expr e =
       print_string ",";
       print_expr e2;
       print_string")")
-  | ELetRec (f,x,e1,e2) ->
-     (print_string "ELet (";
-      print_string f;
-      print_string ",";
-      print_string x;
-      print_string ",";
-      print_expr e1;
-      print_string ",";
-      print_expr e2;
+  | ELetRec (f,e) ->
+     (print_string "ELetRec (";
+      print_expr e;
       print_string")")
   | EFun (x,e) ->
      (print_string "EFun (";
@@ -143,10 +137,6 @@ let rec print_command p =
       (print_string x;
        print_string "=";
        print_expr e)
-  | CRecDecl (f, x, e) ->
-      (print_string f;
-       print_string " ";
-       print_string x;
-       print_string "=";
-       print_expr e)
+  | CRecDecl e ->
+      print_string "- = Declared Rec Functions"
   | CQuit -> print_string "Quit"

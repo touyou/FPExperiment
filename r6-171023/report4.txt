@@ -1,0 +1,40 @@
+171023 藤井陽介
+
+【実行例】
+# let rec fib a = if a=1 then 1 else if a=0 then 1 else (fib (a-1) + fib (a-2));;
+fib = VFun(a)
+# fib 5;;
+- = 8
+# fib 20;;
+- = 10946
+# let rec loop n = if n=0 then 777 else loop (n-1) in loop 10;;
+- = 777
+
+【コード】
+| EFun (x, e) -> VFun (x, e, ref env)
+| ELet (x,e1,e2) ->
+    let v1 = eval_expr env e1 in
+    eval_expr (extend x v1 env) e2
+| ELetRec (f, x, e1, e2) ->
+    let oenv = ref [] in
+    let v = VFun(x, e1, oenv) in
+      (oenv := extend f v env; eval_expr (extend f v env) e2)
+
+| EApp (e1, e2) ->
+    let v1 = eval_expr env e1 in
+    let v2 = eval_expr env e2 in
+    (match v1 with
+    | VFun (x, e, oenv) -> eval_expr (extend x v2 (!oenv)) e
+    | _ -> raise EvalType)
+
+| CRecDecl (f, x, e) ->
+  (try
+    let oenv = ref [] in
+    let v = VFun(x, e, oenv) in
+      (oenv := extend f v env;
+        let newenv = extend f v env in
+        (f, newenv, v))
+
+【考察】
+ex4フォルダに実装しました。問題２を参照じゃないほうでつくったので参照を使った方法です。
+環境を参照型にして、ELetRecでダミーの環境oenvを作成して、ダミーの環境を持ったVFunをfに束縛したものを元々の環境に追加したものでoenvを更新する。こうすることでenvに自分自身を追加した環境にfを定義したことになる。そしてそれをEAppの評価時に取ってきて、参照を解いた環境にv2をxに束縛して評価している。
