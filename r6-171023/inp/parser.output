@@ -3,49 +3,37 @@
    1  toplevel : expr SEMISEMI
    2           | LET var EQ expr SEMISEMI
    3           | LET REC let_and_decls SEMISEMI
-   4           | QUIT SEMISEMI
 
-   5  let_and_decls : var var EQ expr AND let_and_decls
-   6                | var var EQ expr
+   4  let_and_decls : var var EQ expr AND let_and_decls
+   5                | var var EQ expr
 
-   7  expr : LET var EQ expr IN expr
-   8       | LET REC let_and_decls IN expr
+   6  expr : LET var EQ expr IN expr
+   7       | LET REC let_and_decls IN expr
+   8       | IF expr THEN expr ELSE expr
    9       | FUN var ARROW expr
-  10       | IF expr THEN expr ELSE expr
-  11       | value_expr
+  10       | arith_expr EQ arith_expr
+  11       | arith_expr LT arith_expr
+  12       | arith_expr
 
-  12  value_expr : arith_expr
-  13             | or_bool_expr
+  13  arith_expr : arith_expr PLUS factor_expr
+  14             | arith_expr MINUS factor_expr
+  15             | factor_expr
 
-  14  or_bool_expr : or_bool_expr OR and_bool_expr
-  15               | and_bool_expr
+  16  factor_expr : factor_expr TIMES app_expr
+  17              | factor_expr DIV app_expr
+  18              | app_expr
 
-  16  and_bool_expr : and_bool_expr AND bool_expr
-  17                | bool_expr
+  19  app_expr : app_expr atomic_expr
+  20           | atomic_expr
 
-  18  bool_expr : arith_expr EQ arith_expr
-  19            | arith_expr LT arith_expr
-  20            | app_expr
+  21  atomic_expr : INT
+  22              | BOOL
+  23              | ID
+  24              | LPAR expr RPAR
 
-  21  arith_expr : arith_expr PLUS factor_expr
-  22             | arith_expr MINUS factor_expr
-  23             | factor_expr
+  25  var : ID
 
-  24  factor_expr : factor_expr TIMES app_expr
-  25              | factor_expr DIV app_expr
-  26              | app_expr
-
-  27  app_expr : app_expr atomic_expr
-  28           | atomic_expr
-
-  29  atomic_expr : INT
-  30              | BOOL
-  31              | ID
-  32              | LPAR expr RPAR
-
-  33  var : ID
-
-  34  %entry% : '\001' toplevel
+  26  %entry% : '\001' toplevel
 
 state 0
 	$accept : . %entry% $end  (0)
@@ -57,7 +45,7 @@ state 0
 
 
 state 1
-	%entry% : '\001' . toplevel  (34)
+	%entry% : '\001' . toplevel  (26)
 
 	INT  shift 3
 	BOOL  shift 4
@@ -66,19 +54,14 @@ state 1
 	FUN  shift 7
 	IF  shift 8
 	LPAR  shift 9
-	QUIT  shift 10
 	.  error
 
-	toplevel  goto 11
-	expr  goto 12
-	value_expr  goto 13
-	arith_expr  goto 14
-	or_bool_expr  goto 15
-	and_bool_expr  goto 16
-	bool_expr  goto 17
-	app_expr  goto 18
-	factor_expr  goto 19
-	atomic_expr  goto 20
+	toplevel  goto 10
+	expr  goto 11
+	arith_expr  goto 12
+	factor_expr  goto 13
+	app_expr  goto 14
+	atomic_expr  goto 15
 
 
 state 2
@@ -88,128 +71,107 @@ state 2
 
 
 state 3
-	atomic_expr : INT .  (29)
+	atomic_expr : INT .  (21)
 
-	.  reduce 29
+	.  reduce 21
 
 
 state 4
-	atomic_expr : BOOL .  (30)
+	atomic_expr : BOOL .  (22)
 
-	.  reduce 30
+	.  reduce 22
 
 
 state 5
-	atomic_expr : ID .  (31)
+	atomic_expr : ID .  (23)
 
-	.  reduce 31
+	.  reduce 23
 
 
 state 6
 	toplevel : LET . var EQ expr SEMISEMI  (2)
 	toplevel : LET . REC let_and_decls SEMISEMI  (3)
-	expr : LET . var EQ expr IN expr  (7)
-	expr : LET . REC let_and_decls IN expr  (8)
+	expr : LET . var EQ expr IN expr  (6)
+	expr : LET . REC let_and_decls IN expr  (7)
 
-	ID  shift 21
-	REC  shift 22
+	ID  shift 16
+	REC  shift 17
 	.  error
 
-	var  goto 23
+	var  goto 18
 
 
 state 7
 	expr : FUN . var ARROW expr  (9)
 
-	ID  shift 21
+	ID  shift 16
 	.  error
 
-	var  goto 24
+	var  goto 19
 
 
 state 8
-	expr : IF . expr THEN expr ELSE expr  (10)
+	expr : IF . expr THEN expr ELSE expr  (8)
 
 	INT  shift 3
 	BOOL  shift 4
 	ID  shift 5
-	LET  shift 25
+	LET  shift 20
 	FUN  shift 7
 	IF  shift 8
 	LPAR  shift 9
 	.  error
 
-	expr  goto 26
-	value_expr  goto 13
-	arith_expr  goto 14
-	or_bool_expr  goto 15
-	and_bool_expr  goto 16
-	bool_expr  goto 17
-	app_expr  goto 18
-	factor_expr  goto 19
-	atomic_expr  goto 20
+	expr  goto 21
+	arith_expr  goto 12
+	factor_expr  goto 13
+	app_expr  goto 14
+	atomic_expr  goto 15
 
 
 state 9
-	atomic_expr : LPAR . expr RPAR  (32)
+	atomic_expr : LPAR . expr RPAR  (24)
 
 	INT  shift 3
 	BOOL  shift 4
 	ID  shift 5
-	LET  shift 25
+	LET  shift 20
 	FUN  shift 7
 	IF  shift 8
 	LPAR  shift 9
 	.  error
 
-	expr  goto 27
-	value_expr  goto 13
-	arith_expr  goto 14
-	or_bool_expr  goto 15
-	and_bool_expr  goto 16
-	bool_expr  goto 17
-	app_expr  goto 18
-	factor_expr  goto 19
-	atomic_expr  goto 20
+	expr  goto 22
+	arith_expr  goto 12
+	factor_expr  goto 13
+	app_expr  goto 14
+	atomic_expr  goto 15
 
 
 state 10
-	toplevel : QUIT . SEMISEMI  (4)
+	%entry% : '\001' toplevel .  (26)
 
-	SEMISEMI  shift 28
-	.  error
+	.  reduce 26
 
 
 state 11
-	%entry% : '\001' toplevel .  (34)
-
-	.  reduce 34
-
-
-state 12
 	toplevel : expr . SEMISEMI  (1)
 
-	SEMISEMI  shift 29
+	SEMISEMI  shift 23
 	.  error
 
 
-state 13
-	expr : value_expr .  (11)
+state 12
+	expr : arith_expr . EQ arith_expr  (10)
+	expr : arith_expr . LT arith_expr  (11)
+	expr : arith_expr .  (12)
+	arith_expr : arith_expr . PLUS factor_expr  (13)
+	arith_expr : arith_expr . MINUS factor_expr  (14)
 
-	.  reduce 11
-
-
-state 14
-	value_expr : arith_expr .  (12)
-	bool_expr : arith_expr . EQ arith_expr  (18)
-	bool_expr : arith_expr . LT arith_expr  (19)
-	arith_expr : arith_expr . PLUS factor_expr  (21)
-	arith_expr : arith_expr . MINUS factor_expr  (22)
-
-	PLUS  shift 30
-	MINUS  shift 31
-	EQ  shift 32
-	LT  shift 33
+	PLUS  shift 24
+	MINUS  shift 25
+	EQ  shift 26
+	LT  shift 27
 	IN  reduce 12
 	AND  reduce 12
 	THEN  reduce 12
@@ -218,800 +180,618 @@ state 14
 	SEMISEMI  reduce 12
 
 
-state 15
-	value_expr : or_bool_expr .  (13)
-	or_bool_expr : or_bool_expr . OR and_bool_expr  (14)
+state 13
+	arith_expr : factor_expr .  (15)
+	factor_expr : factor_expr . TIMES app_expr  (16)
+	factor_expr : factor_expr . DIV app_expr  (17)
 
-	OR  shift 34
-	IN  reduce 13
-	AND  reduce 13
-	THEN  reduce 13
-	ELSE  reduce 13
-	RPAR  reduce 13
-	SEMISEMI  reduce 13
-
-
-16: shift/reduce conflict (shift 35, reduce 15) on AND
-state 16
-	or_bool_expr : and_bool_expr .  (15)
-	and_bool_expr : and_bool_expr . AND bool_expr  (16)
-
-	AND  shift 35
+	TIMES  shift 28
+	DIV  shift 29
 	IN  reduce 15
-	OR  reduce 15
+	AND  reduce 15
+	PLUS  reduce 15
+	MINUS  reduce 15
+	EQ  reduce 15
+	LT  reduce 15
 	THEN  reduce 15
 	ELSE  reduce 15
 	RPAR  reduce 15
 	SEMISEMI  reduce 15
 
 
-state 17
-	and_bool_expr : bool_expr .  (17)
-
-	.  reduce 17
-
-
-18: reduce/reduce conflict (reduce 20, reduce 26) on IN
-18: reduce/reduce conflict (reduce 20, reduce 26) on AND
-18: reduce/reduce conflict (reduce 20, reduce 26) on THEN
-18: reduce/reduce conflict (reduce 20, reduce 26) on ELSE
-18: reduce/reduce conflict (reduce 20, reduce 26) on RPAR
-18: reduce/reduce conflict (reduce 20, reduce 26) on SEMISEMI
-state 18
-	bool_expr : app_expr .  (20)
-	factor_expr : app_expr .  (26)
-	app_expr : app_expr . atomic_expr  (27)
+state 14
+	factor_expr : app_expr .  (18)
+	app_expr : app_expr . atomic_expr  (19)
 
 	INT  shift 3
 	BOOL  shift 4
 	ID  shift 5
 	LPAR  shift 9
-	IN  reduce 20
-	AND  reduce 20
-	PLUS  reduce 26
-	TIMES  reduce 26
-	MINUS  reduce 26
-	DIV  reduce 26
-	EQ  reduce 26
-	LT  reduce 26
-	OR  reduce 20
-	THEN  reduce 20
-	ELSE  reduce 20
-	RPAR  reduce 20
-	SEMISEMI  reduce 20
-
-	atomic_expr  goto 36
-
-
-state 19
-	arith_expr : factor_expr .  (23)
-	factor_expr : factor_expr . TIMES app_expr  (24)
-	factor_expr : factor_expr . DIV app_expr  (25)
-
-	TIMES  shift 37
-	DIV  shift 38
-	IN  reduce 23
-	AND  reduce 23
-	PLUS  reduce 23
-	MINUS  reduce 23
-	EQ  reduce 23
-	LT  reduce 23
-	OR  reduce 23
-	THEN  reduce 23
-	ELSE  reduce 23
-	RPAR  reduce 23
-	SEMISEMI  reduce 23
-
-
-state 20
-	app_expr : atomic_expr .  (28)
-
-	.  reduce 28
-
-
-state 21
-	var : ID .  (33)
-
-	.  reduce 33
-
-
-state 22
-	toplevel : LET REC . let_and_decls SEMISEMI  (3)
-	expr : LET REC . let_and_decls IN expr  (8)
-
-	ID  shift 21
-	.  error
-
-	var  goto 39
-	let_and_decls  goto 40
-
-
-state 23
-	toplevel : LET var . EQ expr SEMISEMI  (2)
-	expr : LET var . EQ expr IN expr  (7)
-
-	EQ  shift 41
-	.  error
-
-
-state 24
-	expr : FUN var . ARROW expr  (9)
-
-	ARROW  shift 42
-	.  error
-
-
-state 25
-	expr : LET . var EQ expr IN expr  (7)
-	expr : LET . REC let_and_decls IN expr  (8)
-
-	ID  shift 21
-	REC  shift 43
-	.  error
-
-	var  goto 44
-
-
-state 26
-	expr : IF expr . THEN expr ELSE expr  (10)
-
-	THEN  shift 45
-	.  error
-
-
-state 27
-	atomic_expr : LPAR expr . RPAR  (32)
-
-	RPAR  shift 46
-	.  error
-
-
-state 28
-	toplevel : QUIT SEMISEMI .  (4)
-
-	.  reduce 4
-
-
-state 29
-	toplevel : expr SEMISEMI .  (1)
-
-	.  reduce 1
-
-
-state 30
-	arith_expr : arith_expr PLUS . factor_expr  (21)
-
-	INT  shift 3
-	BOOL  shift 4
-	ID  shift 5
-	LPAR  shift 9
-	.  error
-
-	app_expr  goto 47
-	factor_expr  goto 48
-	atomic_expr  goto 20
-
-
-state 31
-	arith_expr : arith_expr MINUS . factor_expr  (22)
-
-	INT  shift 3
-	BOOL  shift 4
-	ID  shift 5
-	LPAR  shift 9
-	.  error
-
-	app_expr  goto 47
-	factor_expr  goto 49
-	atomic_expr  goto 20
-
-
-state 32
-	bool_expr : arith_expr EQ . arith_expr  (18)
-
-	INT  shift 3
-	BOOL  shift 4
-	ID  shift 5
-	LPAR  shift 9
-	.  error
-
-	arith_expr  goto 50
-	app_expr  goto 47
-	factor_expr  goto 19
-	atomic_expr  goto 20
-
-
-state 33
-	bool_expr : arith_expr LT . arith_expr  (19)
-
-	INT  shift 3
-	BOOL  shift 4
-	ID  shift 5
-	LPAR  shift 9
-	.  error
-
-	arith_expr  goto 51
-	app_expr  goto 47
-	factor_expr  goto 19
-	atomic_expr  goto 20
-
-
-state 34
-	or_bool_expr : or_bool_expr OR . and_bool_expr  (14)
-
-	INT  shift 3
-	BOOL  shift 4
-	ID  shift 5
-	LPAR  shift 9
-	.  error
-
-	arith_expr  goto 52
-	and_bool_expr  goto 53
-	bool_expr  goto 17
-	app_expr  goto 18
-	factor_expr  goto 19
-	atomic_expr  goto 20
-
-
-state 35
-	and_bool_expr : and_bool_expr AND . bool_expr  (16)
-
-	INT  shift 3
-	BOOL  shift 4
-	ID  shift 5
-	LPAR  shift 9
-	.  error
-
-	arith_expr  goto 52
-	bool_expr  goto 54
-	app_expr  goto 18
-	factor_expr  goto 19
-	atomic_expr  goto 20
-
-
-state 36
-	app_expr : app_expr atomic_expr .  (27)
-
-	.  reduce 27
-
-
-state 37
-	factor_expr : factor_expr TIMES . app_expr  (24)
-
-	INT  shift 3
-	BOOL  shift 4
-	ID  shift 5
-	LPAR  shift 9
-	.  error
-
-	app_expr  goto 55
-	atomic_expr  goto 20
-
-
-state 38
-	factor_expr : factor_expr DIV . app_expr  (25)
-
-	INT  shift 3
-	BOOL  shift 4
-	ID  shift 5
-	LPAR  shift 9
-	.  error
-
-	app_expr  goto 56
-	atomic_expr  goto 20
-
-
-state 39
-	let_and_decls : var . var EQ expr AND let_and_decls  (5)
-	let_and_decls : var . var EQ expr  (6)
-
-	ID  shift 21
-	.  error
-
-	var  goto 57
-
-
-state 40
-	toplevel : LET REC let_and_decls . SEMISEMI  (3)
-	expr : LET REC let_and_decls . IN expr  (8)
-
-	IN  shift 58
-	SEMISEMI  shift 59
-	.  error
-
-
-state 41
-	toplevel : LET var EQ . expr SEMISEMI  (2)
-	expr : LET var EQ . expr IN expr  (7)
-
-	INT  shift 3
-	BOOL  shift 4
-	ID  shift 5
-	LET  shift 25
-	FUN  shift 7
-	IF  shift 8
-	LPAR  shift 9
-	.  error
-
-	expr  goto 60
-	value_expr  goto 13
-	arith_expr  goto 14
-	or_bool_expr  goto 15
-	and_bool_expr  goto 16
-	bool_expr  goto 17
-	app_expr  goto 18
-	factor_expr  goto 19
-	atomic_expr  goto 20
-
-
-state 42
-	expr : FUN var ARROW . expr  (9)
-
-	INT  shift 3
-	BOOL  shift 4
-	ID  shift 5
-	LET  shift 25
-	FUN  shift 7
-	IF  shift 8
-	LPAR  shift 9
-	.  error
-
-	expr  goto 61
-	value_expr  goto 13
-	arith_expr  goto 14
-	or_bool_expr  goto 15
-	and_bool_expr  goto 16
-	bool_expr  goto 17
-	app_expr  goto 18
-	factor_expr  goto 19
-	atomic_expr  goto 20
-
-
-state 43
-	expr : LET REC . let_and_decls IN expr  (8)
-
-	ID  shift 21
-	.  error
-
-	var  goto 39
-	let_and_decls  goto 62
-
-
-state 44
-	expr : LET var . EQ expr IN expr  (7)
-
-	EQ  shift 63
-	.  error
-
-
-state 45
-	expr : IF expr THEN . expr ELSE expr  (10)
-
-	INT  shift 3
-	BOOL  shift 4
-	ID  shift 5
-	LET  shift 25
-	FUN  shift 7
-	IF  shift 8
-	LPAR  shift 9
-	.  error
-
-	expr  goto 64
-	value_expr  goto 13
-	arith_expr  goto 14
-	or_bool_expr  goto 15
-	and_bool_expr  goto 16
-	bool_expr  goto 17
-	app_expr  goto 18
-	factor_expr  goto 19
-	atomic_expr  goto 20
-
-
-state 46
-	atomic_expr : LPAR expr RPAR .  (32)
-
-	.  reduce 32
-
-
-state 47
-	factor_expr : app_expr .  (26)
-	app_expr : app_expr . atomic_expr  (27)
-
-	INT  shift 3
-	BOOL  shift 4
-	ID  shift 5
-	LPAR  shift 9
-	IN  reduce 26
-	AND  reduce 26
-	PLUS  reduce 26
-	TIMES  reduce 26
-	MINUS  reduce 26
-	DIV  reduce 26
-	EQ  reduce 26
-	LT  reduce 26
-	OR  reduce 26
-	THEN  reduce 26
-	ELSE  reduce 26
-	RPAR  reduce 26
-	SEMISEMI  reduce 26
-
-	atomic_expr  goto 36
-
-
-state 48
-	arith_expr : arith_expr PLUS factor_expr .  (21)
-	factor_expr : factor_expr . TIMES app_expr  (24)
-	factor_expr : factor_expr . DIV app_expr  (25)
-
-	TIMES  shift 37
-	DIV  shift 38
-	IN  reduce 21
-	AND  reduce 21
-	PLUS  reduce 21
-	MINUS  reduce 21
-	EQ  reduce 21
-	LT  reduce 21
-	OR  reduce 21
-	THEN  reduce 21
-	ELSE  reduce 21
-	RPAR  reduce 21
-	SEMISEMI  reduce 21
-
-
-state 49
-	arith_expr : arith_expr MINUS factor_expr .  (22)
-	factor_expr : factor_expr . TIMES app_expr  (24)
-	factor_expr : factor_expr . DIV app_expr  (25)
-
-	TIMES  shift 37
-	DIV  shift 38
-	IN  reduce 22
-	AND  reduce 22
-	PLUS  reduce 22
-	MINUS  reduce 22
-	EQ  reduce 22
-	LT  reduce 22
-	OR  reduce 22
-	THEN  reduce 22
-	ELSE  reduce 22
-	RPAR  reduce 22
-	SEMISEMI  reduce 22
-
-
-state 50
-	bool_expr : arith_expr EQ arith_expr .  (18)
-	arith_expr : arith_expr . PLUS factor_expr  (21)
-	arith_expr : arith_expr . MINUS factor_expr  (22)
-
-	PLUS  shift 30
-	MINUS  shift 31
 	IN  reduce 18
 	AND  reduce 18
-	OR  reduce 18
+	PLUS  reduce 18
+	TIMES  reduce 18
+	MINUS  reduce 18
+	DIV  reduce 18
+	EQ  reduce 18
+	LT  reduce 18
 	THEN  reduce 18
 	ELSE  reduce 18
 	RPAR  reduce 18
 	SEMISEMI  reduce 18
 
-
-state 51
-	bool_expr : arith_expr LT arith_expr .  (19)
-	arith_expr : arith_expr . PLUS factor_expr  (21)
-	arith_expr : arith_expr . MINUS factor_expr  (22)
-
-	PLUS  shift 30
-	MINUS  shift 31
-	IN  reduce 19
-	AND  reduce 19
-	OR  reduce 19
-	THEN  reduce 19
-	ELSE  reduce 19
-	RPAR  reduce 19
-	SEMISEMI  reduce 19
+	atomic_expr  goto 30
 
 
-state 52
-	bool_expr : arith_expr . EQ arith_expr  (18)
-	bool_expr : arith_expr . LT arith_expr  (19)
-	arith_expr : arith_expr . PLUS factor_expr  (21)
-	arith_expr : arith_expr . MINUS factor_expr  (22)
+state 15
+	app_expr : atomic_expr .  (20)
 
-	PLUS  shift 30
-	MINUS  shift 31
-	EQ  shift 32
-	LT  shift 33
+	.  reduce 20
+
+
+state 16
+	var : ID .  (25)
+
+	.  reduce 25
+
+
+state 17
+	toplevel : LET REC . let_and_decls SEMISEMI  (3)
+	expr : LET REC . let_and_decls IN expr  (7)
+
+	ID  shift 16
+	.  error
+
+	var  goto 31
+	let_and_decls  goto 32
+
+
+state 18
+	toplevel : LET var . EQ expr SEMISEMI  (2)
+	expr : LET var . EQ expr IN expr  (6)
+
+	EQ  shift 33
 	.  error
 
 
-53: shift/reduce conflict (shift 35, reduce 14) on AND
-state 53
-	or_bool_expr : or_bool_expr OR and_bool_expr .  (14)
-	and_bool_expr : and_bool_expr . AND bool_expr  (16)
+state 19
+	expr : FUN var . ARROW expr  (9)
 
-	AND  shift 35
+	ARROW  shift 34
+	.  error
+
+
+state 20
+	expr : LET . var EQ expr IN expr  (6)
+	expr : LET . REC let_and_decls IN expr  (7)
+
+	ID  shift 16
+	REC  shift 35
+	.  error
+
+	var  goto 36
+
+
+state 21
+	expr : IF expr . THEN expr ELSE expr  (8)
+
+	THEN  shift 37
+	.  error
+
+
+state 22
+	atomic_expr : LPAR expr . RPAR  (24)
+
+	RPAR  shift 38
+	.  error
+
+
+state 23
+	toplevel : expr SEMISEMI .  (1)
+
+	.  reduce 1
+
+
+state 24
+	arith_expr : arith_expr PLUS . factor_expr  (13)
+
+	INT  shift 3
+	BOOL  shift 4
+	ID  shift 5
+	LPAR  shift 9
+	.  error
+
+	factor_expr  goto 39
+	app_expr  goto 14
+	atomic_expr  goto 15
+
+
+state 25
+	arith_expr : arith_expr MINUS . factor_expr  (14)
+
+	INT  shift 3
+	BOOL  shift 4
+	ID  shift 5
+	LPAR  shift 9
+	.  error
+
+	factor_expr  goto 40
+	app_expr  goto 14
+	atomic_expr  goto 15
+
+
+state 26
+	expr : arith_expr EQ . arith_expr  (10)
+
+	INT  shift 3
+	BOOL  shift 4
+	ID  shift 5
+	LPAR  shift 9
+	.  error
+
+	arith_expr  goto 41
+	factor_expr  goto 13
+	app_expr  goto 14
+	atomic_expr  goto 15
+
+
+state 27
+	expr : arith_expr LT . arith_expr  (11)
+
+	INT  shift 3
+	BOOL  shift 4
+	ID  shift 5
+	LPAR  shift 9
+	.  error
+
+	arith_expr  goto 42
+	factor_expr  goto 13
+	app_expr  goto 14
+	atomic_expr  goto 15
+
+
+state 28
+	factor_expr : factor_expr TIMES . app_expr  (16)
+
+	INT  shift 3
+	BOOL  shift 4
+	ID  shift 5
+	LPAR  shift 9
+	.  error
+
+	app_expr  goto 43
+	atomic_expr  goto 15
+
+
+state 29
+	factor_expr : factor_expr DIV . app_expr  (17)
+
+	INT  shift 3
+	BOOL  shift 4
+	ID  shift 5
+	LPAR  shift 9
+	.  error
+
+	app_expr  goto 44
+	atomic_expr  goto 15
+
+
+state 30
+	app_expr : app_expr atomic_expr .  (19)
+
+	.  reduce 19
+
+
+state 31
+	let_and_decls : var . var EQ expr AND let_and_decls  (4)
+	let_and_decls : var . var EQ expr  (5)
+
+	ID  shift 16
+	.  error
+
+	var  goto 45
+
+
+state 32
+	toplevel : LET REC let_and_decls . SEMISEMI  (3)
+	expr : LET REC let_and_decls . IN expr  (7)
+
+	IN  shift 46
+	SEMISEMI  shift 47
+	.  error
+
+
+state 33
+	toplevel : LET var EQ . expr SEMISEMI  (2)
+	expr : LET var EQ . expr IN expr  (6)
+
+	INT  shift 3
+	BOOL  shift 4
+	ID  shift 5
+	LET  shift 20
+	FUN  shift 7
+	IF  shift 8
+	LPAR  shift 9
+	.  error
+
+	expr  goto 48
+	arith_expr  goto 12
+	factor_expr  goto 13
+	app_expr  goto 14
+	atomic_expr  goto 15
+
+
+state 34
+	expr : FUN var ARROW . expr  (9)
+
+	INT  shift 3
+	BOOL  shift 4
+	ID  shift 5
+	LET  shift 20
+	FUN  shift 7
+	IF  shift 8
+	LPAR  shift 9
+	.  error
+
+	expr  goto 49
+	arith_expr  goto 12
+	factor_expr  goto 13
+	app_expr  goto 14
+	atomic_expr  goto 15
+
+
+state 35
+	expr : LET REC . let_and_decls IN expr  (7)
+
+	ID  shift 16
+	.  error
+
+	var  goto 31
+	let_and_decls  goto 50
+
+
+state 36
+	expr : LET var . EQ expr IN expr  (6)
+
+	EQ  shift 51
+	.  error
+
+
+state 37
+	expr : IF expr THEN . expr ELSE expr  (8)
+
+	INT  shift 3
+	BOOL  shift 4
+	ID  shift 5
+	LET  shift 20
+	FUN  shift 7
+	IF  shift 8
+	LPAR  shift 9
+	.  error
+
+	expr  goto 52
+	arith_expr  goto 12
+	factor_expr  goto 13
+	app_expr  goto 14
+	atomic_expr  goto 15
+
+
+state 38
+	atomic_expr : LPAR expr RPAR .  (24)
+
+	.  reduce 24
+
+
+state 39
+	arith_expr : arith_expr PLUS factor_expr .  (13)
+	factor_expr : factor_expr . TIMES app_expr  (16)
+	factor_expr : factor_expr . DIV app_expr  (17)
+
+	TIMES  shift 28
+	DIV  shift 29
+	IN  reduce 13
+	AND  reduce 13
+	PLUS  reduce 13
+	MINUS  reduce 13
+	EQ  reduce 13
+	LT  reduce 13
+	THEN  reduce 13
+	ELSE  reduce 13
+	RPAR  reduce 13
+	SEMISEMI  reduce 13
+
+
+state 40
+	arith_expr : arith_expr MINUS factor_expr .  (14)
+	factor_expr : factor_expr . TIMES app_expr  (16)
+	factor_expr : factor_expr . DIV app_expr  (17)
+
+	TIMES  shift 28
+	DIV  shift 29
 	IN  reduce 14
-	OR  reduce 14
+	AND  reduce 14
+	PLUS  reduce 14
+	MINUS  reduce 14
+	EQ  reduce 14
+	LT  reduce 14
 	THEN  reduce 14
 	ELSE  reduce 14
 	RPAR  reduce 14
 	SEMISEMI  reduce 14
 
 
-state 54
-	and_bool_expr : and_bool_expr AND bool_expr .  (16)
+state 41
+	expr : arith_expr EQ arith_expr .  (10)
+	arith_expr : arith_expr . PLUS factor_expr  (13)
+	arith_expr : arith_expr . MINUS factor_expr  (14)
 
-	.  reduce 16
+	PLUS  shift 24
+	MINUS  shift 25
+	IN  reduce 10
+	AND  reduce 10
+	THEN  reduce 10
+	ELSE  reduce 10
+	RPAR  reduce 10
+	SEMISEMI  reduce 10
 
 
-state 55
-	factor_expr : factor_expr TIMES app_expr .  (24)
-	app_expr : app_expr . atomic_expr  (27)
+state 42
+	expr : arith_expr LT arith_expr .  (11)
+	arith_expr : arith_expr . PLUS factor_expr  (13)
+	arith_expr : arith_expr . MINUS factor_expr  (14)
+
+	PLUS  shift 24
+	MINUS  shift 25
+	IN  reduce 11
+	AND  reduce 11
+	THEN  reduce 11
+	ELSE  reduce 11
+	RPAR  reduce 11
+	SEMISEMI  reduce 11
+
+
+state 43
+	factor_expr : factor_expr TIMES app_expr .  (16)
+	app_expr : app_expr . atomic_expr  (19)
 
 	INT  shift 3
 	BOOL  shift 4
 	ID  shift 5
 	LPAR  shift 9
-	IN  reduce 24
-	AND  reduce 24
-	PLUS  reduce 24
-	TIMES  reduce 24
-	MINUS  reduce 24
-	DIV  reduce 24
-	EQ  reduce 24
-	LT  reduce 24
-	OR  reduce 24
-	THEN  reduce 24
-	ELSE  reduce 24
-	RPAR  reduce 24
-	SEMISEMI  reduce 24
+	IN  reduce 16
+	AND  reduce 16
+	PLUS  reduce 16
+	TIMES  reduce 16
+	MINUS  reduce 16
+	DIV  reduce 16
+	EQ  reduce 16
+	LT  reduce 16
+	THEN  reduce 16
+	ELSE  reduce 16
+	RPAR  reduce 16
+	SEMISEMI  reduce 16
 
-	atomic_expr  goto 36
+	atomic_expr  goto 30
 
 
-state 56
-	factor_expr : factor_expr DIV app_expr .  (25)
-	app_expr : app_expr . atomic_expr  (27)
+state 44
+	factor_expr : factor_expr DIV app_expr .  (17)
+	app_expr : app_expr . atomic_expr  (19)
 
 	INT  shift 3
 	BOOL  shift 4
 	ID  shift 5
 	LPAR  shift 9
-	IN  reduce 25
-	AND  reduce 25
-	PLUS  reduce 25
-	TIMES  reduce 25
-	MINUS  reduce 25
-	DIV  reduce 25
-	EQ  reduce 25
-	LT  reduce 25
-	OR  reduce 25
-	THEN  reduce 25
-	ELSE  reduce 25
-	RPAR  reduce 25
-	SEMISEMI  reduce 25
+	IN  reduce 17
+	AND  reduce 17
+	PLUS  reduce 17
+	TIMES  reduce 17
+	MINUS  reduce 17
+	DIV  reduce 17
+	EQ  reduce 17
+	LT  reduce 17
+	THEN  reduce 17
+	ELSE  reduce 17
+	RPAR  reduce 17
+	SEMISEMI  reduce 17
 
-	atomic_expr  goto 36
+	atomic_expr  goto 30
 
 
-state 57
-	let_and_decls : var var . EQ expr AND let_and_decls  (5)
-	let_and_decls : var var . EQ expr  (6)
+state 45
+	let_and_decls : var var . EQ expr AND let_and_decls  (4)
+	let_and_decls : var var . EQ expr  (5)
 
-	EQ  shift 65
+	EQ  shift 53
 	.  error
 
 
-state 58
-	expr : LET REC let_and_decls IN . expr  (8)
+state 46
+	expr : LET REC let_and_decls IN . expr  (7)
 
 	INT  shift 3
 	BOOL  shift 4
 	ID  shift 5
-	LET  shift 25
+	LET  shift 20
 	FUN  shift 7
 	IF  shift 8
 	LPAR  shift 9
 	.  error
 
-	expr  goto 66
-	value_expr  goto 13
-	arith_expr  goto 14
-	or_bool_expr  goto 15
-	and_bool_expr  goto 16
-	bool_expr  goto 17
-	app_expr  goto 18
-	factor_expr  goto 19
-	atomic_expr  goto 20
+	expr  goto 54
+	arith_expr  goto 12
+	factor_expr  goto 13
+	app_expr  goto 14
+	atomic_expr  goto 15
 
 
-state 59
+state 47
 	toplevel : LET REC let_and_decls SEMISEMI .  (3)
 
 	.  reduce 3
 
 
-state 60
+state 48
 	toplevel : LET var EQ expr . SEMISEMI  (2)
-	expr : LET var EQ expr . IN expr  (7)
+	expr : LET var EQ expr . IN expr  (6)
 
-	IN  shift 67
-	SEMISEMI  shift 68
+	IN  shift 55
+	SEMISEMI  shift 56
 	.  error
 
 
-state 61
+state 49
 	expr : FUN var ARROW expr .  (9)
 
 	.  reduce 9
 
 
-state 62
-	expr : LET REC let_and_decls . IN expr  (8)
+state 50
+	expr : LET REC let_and_decls . IN expr  (7)
 
-	IN  shift 58
+	IN  shift 46
 	.  error
 
 
-state 63
-	expr : LET var EQ . expr IN expr  (7)
+state 51
+	expr : LET var EQ . expr IN expr  (6)
 
 	INT  shift 3
 	BOOL  shift 4
 	ID  shift 5
-	LET  shift 25
+	LET  shift 20
 	FUN  shift 7
 	IF  shift 8
 	LPAR  shift 9
 	.  error
 
-	expr  goto 69
-	value_expr  goto 13
-	arith_expr  goto 14
-	or_bool_expr  goto 15
-	and_bool_expr  goto 16
-	bool_expr  goto 17
-	app_expr  goto 18
-	factor_expr  goto 19
-	atomic_expr  goto 20
+	expr  goto 57
+	arith_expr  goto 12
+	factor_expr  goto 13
+	app_expr  goto 14
+	atomic_expr  goto 15
 
 
-state 64
-	expr : IF expr THEN expr . ELSE expr  (10)
+state 52
+	expr : IF expr THEN expr . ELSE expr  (8)
 
-	ELSE  shift 70
+	ELSE  shift 58
 	.  error
 
 
-state 65
-	let_and_decls : var var EQ . expr AND let_and_decls  (5)
-	let_and_decls : var var EQ . expr  (6)
+state 53
+	let_and_decls : var var EQ . expr AND let_and_decls  (4)
+	let_and_decls : var var EQ . expr  (5)
 
 	INT  shift 3
 	BOOL  shift 4
 	ID  shift 5
-	LET  shift 25
+	LET  shift 20
 	FUN  shift 7
 	IF  shift 8
 	LPAR  shift 9
 	.  error
 
-	expr  goto 71
-	value_expr  goto 13
-	arith_expr  goto 14
-	or_bool_expr  goto 15
-	and_bool_expr  goto 16
-	bool_expr  goto 17
-	app_expr  goto 18
-	factor_expr  goto 19
-	atomic_expr  goto 20
+	expr  goto 59
+	arith_expr  goto 12
+	factor_expr  goto 13
+	app_expr  goto 14
+	atomic_expr  goto 15
 
 
-state 66
-	expr : LET REC let_and_decls IN expr .  (8)
+state 54
+	expr : LET REC let_and_decls IN expr .  (7)
 
-	.  reduce 8
+	.  reduce 7
 
 
-state 67
-	expr : LET var EQ expr IN . expr  (7)
+state 55
+	expr : LET var EQ expr IN . expr  (6)
 
 	INT  shift 3
 	BOOL  shift 4
 	ID  shift 5
-	LET  shift 25
+	LET  shift 20
 	FUN  shift 7
 	IF  shift 8
 	LPAR  shift 9
 	.  error
 
-	expr  goto 72
-	value_expr  goto 13
-	arith_expr  goto 14
-	or_bool_expr  goto 15
-	and_bool_expr  goto 16
-	bool_expr  goto 17
-	app_expr  goto 18
-	factor_expr  goto 19
-	atomic_expr  goto 20
+	expr  goto 60
+	arith_expr  goto 12
+	factor_expr  goto 13
+	app_expr  goto 14
+	atomic_expr  goto 15
 
 
-state 68
+state 56
 	toplevel : LET var EQ expr SEMISEMI .  (2)
 
 	.  reduce 2
 
 
-state 69
-	expr : LET var EQ expr . IN expr  (7)
+state 57
+	expr : LET var EQ expr . IN expr  (6)
 
-	IN  shift 67
+	IN  shift 55
 	.  error
 
 
-state 70
-	expr : IF expr THEN expr ELSE . expr  (10)
+state 58
+	expr : IF expr THEN expr ELSE . expr  (8)
 
 	INT  shift 3
 	BOOL  shift 4
 	ID  shift 5
-	LET  shift 25
+	LET  shift 20
 	FUN  shift 7
 	IF  shift 8
 	LPAR  shift 9
 	.  error
 
-	expr  goto 73
-	value_expr  goto 13
-	arith_expr  goto 14
-	or_bool_expr  goto 15
-	and_bool_expr  goto 16
-	bool_expr  goto 17
-	app_expr  goto 18
-	factor_expr  goto 19
-	atomic_expr  goto 20
+	expr  goto 61
+	arith_expr  goto 12
+	factor_expr  goto 13
+	app_expr  goto 14
+	atomic_expr  goto 15
 
 
-state 71
-	let_and_decls : var var EQ expr . AND let_and_decls  (5)
-	let_and_decls : var var EQ expr .  (6)
+state 59
+	let_and_decls : var var EQ expr . AND let_and_decls  (4)
+	let_and_decls : var var EQ expr .  (5)
 
-	AND  shift 74
-	IN  reduce 6
-	SEMISEMI  reduce 6
-
-
-state 72
-	expr : LET var EQ expr IN expr .  (7)
-
-	.  reduce 7
+	AND  shift 62
+	IN  reduce 5
+	SEMISEMI  reduce 5
 
 
-state 73
-	expr : IF expr THEN expr ELSE expr .  (10)
+state 60
+	expr : LET var EQ expr IN expr .  (6)
 
-	.  reduce 10
+	.  reduce 6
 
 
-state 74
-	let_and_decls : var var EQ expr AND . let_and_decls  (5)
+state 61
+	expr : IF expr THEN expr ELSE expr .  (8)
 
-	ID  shift 21
+	.  reduce 8
+
+
+state 62
+	let_and_decls : var var EQ expr AND . let_and_decls  (4)
+
+	ID  shift 16
 	.  error
 
-	var  goto 39
-	let_and_decls  goto 75
+	var  goto 31
+	let_and_decls  goto 63
 
 
-state 75
-	let_and_decls : var var EQ expr AND let_and_decls .  (5)
+state 63
+	let_and_decls : var var EQ expr AND let_and_decls .  (4)
 
-	.  reduce 5
-
-
-State 16 contains 1 shift/reduce conflict.
-State 18 contains 6 reduce/reduce conflicts.
-State 53 contains 1 shift/reduce conflict.
+	.  reduce 4
 
 
-26 terminals, 14 nonterminals
-35 grammar rules, 76 states
+26 terminals, 10 nonterminals
+27 grammar rules, 64 states

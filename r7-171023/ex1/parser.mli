@@ -5,7 +5,6 @@ type token =
   | LET
   | IN
   | REC
-  | AND
   | FUN
   | ARROW
   | PLUS
@@ -15,6 +14,7 @@ type token =
   | EQ
   | LT
   | OR
+  | AND
   | IF
   | THEN
   | ELSE

@@ -1,0 +1,55 @@
+171023 藤井陽介
+
+【実行例】
+# let rec even n = if n=0 then true else odd (n-1) and odd n = if n=0 then false else even (n-1);;
+- = VRecFun
+# even 10;;
+- = true
+# odd 10;;
+- = false
+# even 11;;
+- = false
+# odd 13;;
+- = true
+
+【コード】
+
+
+let rec get_n el n =
+  match el with
+  | e :: ex -> if n=1 then e else get_n ex (n-1)
+  | [] -> raise EvalUnbound
+
+let rec extend_list oe e oenv env n =
+  match e with
+  | y :: yr ->
+    let (f, x, v) = y in
+    extend_list oe yr oenv ((f, VRecFun (n, oe, oenv)) :: env) (n+1)
+  | [] -> env;;
+
+
+| ELetRec (f,e) ->
+    let env' = extend_list f f env env 1 in
+    eval_expr env' e
+
+
+| EApp (e1, e2) ->
+    let v1 = eval_expr env e1 in
+    let v2 = eval_expr env e2 in
+    (match v1 with
+    | VFun(x,e,oenv) ->
+        eval_expr (extend x v2 oenv) e
+    | VRecFun(n, e, oenv) ->
+        let (fi, xi, ei) = get_n e n in
+        eval_expr (extend xi v2 env) ei
+    | _ -> raise EvalUnbound)
+
+
+| CRecDecl e ->
+  let newenv = extend_list e e env env 1 in
+  ("-", newenv, VRecFun(1,e,env))
+
+【考察】
+inp内で実装しています。conflictが起きた上にandの構文をうまくひろえなかったのでinp内では配布資料のex3/parser.mlyを使いました。
+スライドに書いてあった方法１のやり方で実装するためにextend_listとget_nという関数を新たに用意しました。extend_listでは関数名をVRecFunに束縛するという操作を環境と関数リストのオリジナルを受け継ぎながら再帰することで実装しています。またget_nではn番目の関数を取り出してくるようにしています。
+これを実装したことによりELetRecやCRecDecl自体では環境を拡張するだけの単純な実装となり、評価時にはget_nで取り出してきた変数名にv2を束縛して評価しました。

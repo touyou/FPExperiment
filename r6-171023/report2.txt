@@ -2,7 +2,7 @@
 
 【実行例】
 # let rec fib a = if a=1 || a=0 then 1 else (fib (a-1) + fib (a-2));;
-fib = VRecFun(fib,a)
+- = VRecFun
 # fib 5;;
 - = 8
 # fib 20;;
@@ -38,4 +38,5 @@ with
 | EvalZeroDivision -> ("-", env, VError "Divided by Zero"))
 
 【考察】
+ex2内で実装しています。conflictはandを拡張しようとした時についてしまいうまく消すことができませんでした。
 再帰は環境を拡張する形で実装した。VRecFunを宣言した環境下でin以降の式を評価することで再帰を実現している。評価の際には宣言時の環境にもう一度関数と引数の値のみ拡張した環境下でin以前を評価するという形になっている。
