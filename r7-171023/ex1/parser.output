@@ -6,7 +6,7 @@
    4           | QUIT SEMISEMI
 
    5  expr : LET var EQ expr IN expr
-   6       | LET REC var var EQ expr IN expr SEMISEMI
+   6       | LET REC var var EQ expr IN expr
    7       | FUN var ARROW expr
    8       | IF expr THEN expr ELSE expr
    9       | value_expr
@@ -106,7 +106,7 @@ state 6
 	toplevel : LET . var EQ expr SEMISEMI  (2)
 	toplevel : LET . REC var var EQ expr SEMISEMI  (3)
 	expr : LET . var EQ expr IN expr  (5)
-	expr : LET . REC var var EQ expr IN expr SEMISEMI  (6)
+	expr : LET . REC var var EQ expr IN expr  (6)
 
 	ID  shift 21
 	REC  shift 22
@@ -310,7 +310,7 @@ state 21
 
 state 22
 	toplevel : LET REC . var var EQ expr SEMISEMI  (3)
-	expr : LET REC . var var EQ expr IN expr SEMISEMI  (6)
+	expr : LET REC . var var EQ expr IN expr  (6)
 
 	ID  shift 21
 	.  error
@@ -335,7 +335,7 @@ state 24
 
 state 25
 	expr : LET . var EQ expr IN expr  (5)
-	expr : LET . REC var var EQ expr IN expr SEMISEMI  (6)
+	expr : LET . REC var var EQ expr IN expr  (6)
 
 	ID  shift 21
 	REC  shift 42
@@ -495,7 +495,7 @@ state 38
 
 state 39
 	toplevel : LET REC var . var EQ expr SEMISEMI  (3)
-	expr : LET REC var . var EQ expr IN expr SEMISEMI  (6)
+	expr : LET REC var . var EQ expr IN expr  (6)
 
 	ID  shift 21
 	.  error
@@ -551,7 +551,7 @@ state 41
 
 
 state 42
-	expr : LET REC . var var EQ expr IN expr SEMISEMI  (6)
+	expr : LET REC . var var EQ expr IN expr  (6)
 
 	ID  shift 21
 	.  error
@@ -776,7 +776,7 @@ state 55
 
 state 56
 	toplevel : LET REC var var . EQ expr SEMISEMI  (3)
-	expr : LET REC var var . EQ expr IN expr SEMISEMI  (6)
+	expr : LET REC var var . EQ expr IN expr  (6)
 
 	EQ  shift 62
 	.  error
@@ -798,7 +798,7 @@ state 58
 
 
 state 59
-	expr : LET REC var . var EQ expr IN expr SEMISEMI  (6)
+	expr : LET REC var . var EQ expr IN expr  (6)
 
 	ID  shift 21
 	.  error
@@ -838,7 +838,7 @@ state 61
 
 state 62
 	toplevel : LET REC var var EQ . expr SEMISEMI  (3)
-	expr : LET REC var var EQ . expr IN expr SEMISEMI  (6)
+	expr : LET REC var var EQ . expr IN expr  (6)
 
 	INT  shift 3
 	BOOL  shift 4
@@ -890,7 +890,7 @@ state 64
 
 
 state 65
-	expr : LET REC var var . EQ expr IN expr SEMISEMI  (6)
+	expr : LET REC var var . EQ expr IN expr  (6)
 
 	EQ  shift 70
 	.  error
@@ -928,7 +928,7 @@ state 67
 
 state 68
 	toplevel : LET REC var var EQ expr . SEMISEMI  (3)
-	expr : LET REC var var EQ expr . IN expr SEMISEMI  (6)
+	expr : LET REC var var EQ expr . IN expr  (6)
 
 	IN  shift 72
 	SEMISEMI  shift 73
@@ -942,7 +942,7 @@ state 69
 
 
 state 70
-	expr : LET REC var var EQ . expr IN expr SEMISEMI  (6)
+	expr : LET REC var var EQ . expr IN expr  (6)
 
 	INT  shift 3
 	BOOL  shift 4
@@ -971,7 +971,7 @@ state 71
 
 
 state 72
-	expr : LET REC var var EQ expr IN . expr SEMISEMI  (6)
+	expr : LET REC var var EQ expr IN . expr  (6)
 
 	INT  shift 3
 	BOOL  shift 4
@@ -1000,21 +1000,14 @@ state 73
 
 
 state 74
-	expr : LET REC var var EQ expr . IN expr SEMISEMI  (6)
+	expr : LET REC var var EQ expr . IN expr  (6)
 
 	IN  shift 72
 	.  error
 
 
 state 75
-	expr : LET REC var var EQ expr IN expr . SEMISEMI  (6)
-
-	SEMISEMI  shift 76
-	.  error
-
-
-state 76
-	expr : LET REC var var EQ expr IN expr SEMISEMI .  (6)
+	expr : LET REC var var EQ expr IN expr .  (6)
 
 	.  reduce 6
 
@@ -1023,4 +1016,4 @@ State 18 contains 5 reduce/reduce conflicts.
 
 
 26 terminals, 13 nonterminals
-33 grammar rules, 77 states
+33 grammar rules, 76 states

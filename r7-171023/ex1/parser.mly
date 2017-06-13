@@ -31,7 +31,7 @@ toplevel:
 
 expr:
   | LET var EQ expr IN expr     { ELet($2,$4,$6) }
-  | LET REC var var EQ expr IN expr SEMISEMI { ELetRec($3,$4,$6,$8) }
+  | LET REC var var EQ expr IN expr { ELetRec($3,$4,$6,$8) }
   | FUN var ARROW expr          { EFun($2, $4) }
   | IF expr THEN expr ELSE expr { EIf($2,$4,$6) }
   | value_expr                  { $1 }
