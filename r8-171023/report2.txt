@@ -1,0 +1,28 @@
+171023 藤井陽介
+
+【実行例】
+実行例はインタプリタの型推論が正常に動いている例を問4のレポートに載せています。
+
+【コード】
+(* subst lookup *)
+let rec lookup_subst s v =
+  match s with
+  | [] -> raise SubstUnbound
+  | (tv, typ) :: sr -> if tv = v then typ else lookup_subst sr v;;
+
+(* ty_subst : subst -> ty -> ty *)
+let rec ty_subst s t =
+  match t with
+  | TyInt -> TyInt
+  | TyBool -> TyBool
+  | TyFun (x, y) -> TyFun (ty_subst s x, ty_subst s y)
+  | TyVar x ->
+    try
+      lookup_subst s x
+    with
+    | SubstUnbound -> TyVar x;;
+
+【考察】
+コードはmyocamlファイル内です。
+TyVarに関してはその変数が存在する場合としない場合で代入の処理が変わるので、エラーを返してそれによって処理を分けるよう実装しました。
+その他に関しては基本的にスライドの定義をもとに実装しています。

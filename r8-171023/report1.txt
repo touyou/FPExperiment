@@ -1,0 +1,7 @@
+171023 藤井陽介
+
+1. [alpha:=Int, beta:=Int->Int]
+2. なし
+3. [alpha:=Int, beta:=Int]
+4. [alpha1:=alpha2, alpha2:=alpha3, alpha3:=beta1->beta2]
+5. なし
