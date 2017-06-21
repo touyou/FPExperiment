@@ -15,6 +15,65 @@ let extend x v env = (x, v) :: env
 let rec lookup x env =
   try List.assoc x env with Not_found -> raise Unbound
 
+(* find_match : pattern -> value -> (name * value) list option 
+let rec find_match p v =
+  match p, v with
+  | (PInt x, VInt y) -> if x=y then Some [] else None
+  | (PBool x, VBool y) -> if x=y then Some [] else None
+  | (PVar n, m) -> Some [(n, m)]
+  | (PPair (x1,y1), VPair (x2,y2)) ->
+      match find_match x1 x2, find_match x2 y2 with
+      | (Some r1, Some r2) -> Some r1@r2
+      | (_, _) -> None
+  | (PCons (x1,y1), VCons (x2,y2)) ->
+      match find_match x1 x2, find_match x2 y2 with
+      | (Some r1, Some r2) -> Some r1@r2
+      | (_, _) -> None
+  | (PNil, VNil) -> Some []
+  | (_, _) -> None *)
+
+(* get_type_vars : ty -> tyvar list *)
+let rec get_type_vars typ =
+  match typ with
+  | TyVar x -> [x]
+  | TyFun (v1, v2) -> (get_type_vars v1) @ (get_type_vars v2)
+  | _ -> []
+;;
+
+let rec check_env env typ =
+  match env with
+  | [] -> true
+  | (n, t) :: envr -> if t = typ then false else check_env envr typ
+;;
+
+(* generalize : tyenv -> ty -> type_schema *)
+let rec generalize env typ =
+  match typ with
+  | TyInt -> ([], TyInt)
+  | TyBool -> ([], TyBool)
+  | TyVar x -> if check_env env typ then ([x], typ) else ([], typ)
+  | TyFun (v1, v2) ->
+      let (l1, t1) = generalize env v1 in
+      let (l2, t2) = generalize env v2 in
+      (l1@l2, typ)
+;;
+
+let rec ex_tvar typ v newv =
+  match typ with
+  | TyVar x -> if x=v then TyVar newv else typ
+  | TyFun (x1, x2) -> TyFun ((ex_tvar x1 v newv), (ex_tvar x2 v newv))
+  | _ -> typ
+;;
+
+(* instantiate : type_schema -> ty *)
+let rec instantiate scm =
+  match scm with
+  | ([], typ) -> typ
+  | (v :: vr, typ) ->
+      let newv = new_tyvar () in
+      instantiate (vr, ex_tvar typ v newv)
+;;
+
 (* infer_expr: tyenv->expr->ty * constraints *)
 let rec infer_expr env e =
   match e with

@@ -1,2 +1,0 @@
-tySyntax.cmo :
-tySyntax.cmx :

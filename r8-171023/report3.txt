@@ -1,3 +1,13 @@
 171023 藤井陽介
 
+【コード】
+(* compose : subst -> subst -> subst *)
+let rec compose s1 s2 =
+  match s1 with
+  | [] -> s2
+  | (tv, typ) :: sr -> (tv, ty_subst s2 typ) :: compose sr s2
+;;
 
+【考察】
+コードはmyocaml内にあります。
+s1から一個ずつ取り出してs2の代入をかけるように実装しました。
