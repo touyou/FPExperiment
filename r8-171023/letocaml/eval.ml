@@ -95,7 +95,8 @@ let rec infer_expr env e =
     let delta = tyenv_subst sigma env in
     let p1 = get_type_vars s1 in
     let p2 = List.concat (List.map (fun (lis, typ) -> let (tlist, _) = typ in tlist) delta) in
-    infer_expr ((x, (p1@p2, s1)) :: env) e2
+    let (t2, c2) = infer_expr ((x, (p1@p2, s1)) :: env) e2 in
+    (t2, c2 @ c1)
   | EIf (e1, e2, e3) ->
     let (t1, c1) = infer_expr env e1 in
     let (t2, c2) = infer_expr env e2 in
@@ -117,35 +118,15 @@ let rec infer_expr env e =
     let (t1, c1) = infer_expr ((f, generalize env (TyFun (alpha, beta))) :: ((x, generalize env alpha) :: env)) e1 in
     let (t2, c2) = infer_expr ((f, generalize env (TyFun (alpha, beta))) :: env) e2 in
     (t2, (t1, beta) :: c1 @ c2)
-  | EAdd (e1, e2) ->
+  | EAdd (e1, e2) | ESub (e1, e2) | EMul (e1, e2) | EDiv (e1, e2) ->
     let (t1, c1) = infer_expr env e1 in
     let (t2, c2) = infer_expr env e2 in
     (TyInt, [(t1, TyInt); (t2, TyInt)] @ c1 @ c2)
-  | ESub (e1, e2) ->
-    let (t1, c1) = infer_expr env e1 in
-    let (t2, c2) = infer_expr env e2 in
-    (TyInt, [(t1, TyInt); (t2, TyInt)] @ c1 @ c2)
-  | EMul (e1, e2) ->
-    let (t1, c1) = infer_expr env e1 in
-    let (t2, c2) = infer_expr env e2 in
-    (TyInt, [(t1, TyInt); (t2, TyInt)] @ c1 @ c2)
-  | EDiv (e1, e2) ->
-    let (t1, c1) = infer_expr env e1 in
-    let (t2, c2) = infer_expr env e2 in
-    (TyInt, [(t1, TyInt); (t2, TyInt)] @ c1 @ c2)
-  | EEq (e1, e2) ->
+  | EEq (e1, e2) | ELt (e1, e2) ->
     let (t1, c1) = infer_expr env e1 in
     let (t2, c2) = infer_expr env e2 in
     (TyBool, [(t1, TyInt); (t2, TyInt)] @ c1 @ c2)
-  | ELt (e1, e2) ->
-    let (t1, c1) = infer_expr env e1 in
-    let (t2, c2) = infer_expr env e2 in
-    (TyBool, [(t1, TyInt); (t2, TyInt)] @ c1 @ c2)
-  | EAnd (e1, e2) ->
-    let (t1, c1) = infer_expr env e1 in
-    let (t2, c2) = infer_expr env e2 in
-    (TyBool, [(t1, TyBool); (t2, TyBool)] @ c1 @ c2)
-  | EOr (e1, e2) ->
+  | EAnd (e1, e2) | EOr (e1, e2) ->
     let (t1, c1) = infer_expr env e1 in
     let (t2, c2) = infer_expr env e2 in
     (TyBool, [(t1, TyBool); (t2, TyBool)] @ c1 @ c2)

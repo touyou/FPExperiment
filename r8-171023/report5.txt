@@ -90,7 +90,8 @@ let rec infer_expr env e =
     let delta = tyenv_subst sigma env in
     let p1 = get_type_vars s1 in
     let p2 = List.concat (List.map (fun (lis, typ) -> let (tlist, _) = typ in tlist) delta) in
-    infer_expr ((x, (p1@p2, s1)) :: env) e2
+    let (t2, c2) = infer_expr ((x, (p1@p2, s1)) :: env) e2 in
+    (t2, c2 @ c1)
   | EIf (e1, e2, e3) ->
     let (t1, c1) = infer_expr env e1 in
     let (t2, c2) = infer_expr env e2 in
