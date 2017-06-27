@@ -24,9 +24,6 @@ type value =
   | VFun of name * expr * env
   | VRecFun of name * name * expr * env
   | VError of string
-  | VPair of value * value
-  | VNil
-  | VCons of value * value
 and env = (name * value) list
 
 type command =
@@ -34,14 +31,6 @@ type command =
   | CDecl of name * expr
   | CRecDecl of name * name * expr
   | CQuit
-
-type pattern =
-  | PInt of int
-  | PBool of bool
-  | PVar of name
-  | PPair of pattern * pattern
-  | PNil
-  | PCons of pattern * pattern
 
 let print_name = print_string
 
