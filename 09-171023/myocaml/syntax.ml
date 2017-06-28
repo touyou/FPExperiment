@@ -1,5 +1,13 @@
 type name = string
 
+type pattern =
+  | PInt of int
+  | PBool of bool
+  | PVar of name
+  | PPair of pattern * pattern
+  | PNil
+  | PCons of pattern * pattern
+
 type expr =
   | EConstInt  of int
   | EConstBool of bool
@@ -17,6 +25,10 @@ type expr =
   | ELet       of name * expr * expr
   | ELetRec    of name * name * expr * expr
   | EApp       of expr * expr
+  | EPair      of expr * expr
+  | ENil
+  | ECons      of expr * expr
+  | EMatch     of expr * (pattern * expr) list
 
 type value =
   | VInt  of int
@@ -24,6 +36,9 @@ type value =
   | VFun of name * expr * env
   | VRecFun of name * name * expr * env
   | VError of string
+  | VPair of value * value
+  | VNil
+  | VCons of value * value
 and env = (name * value) list
 
 type command =
@@ -34,14 +49,32 @@ type command =
 
 let print_name = print_string
 
-let print_value v =
+let rec print_pattern p =
+  match p with
+  | PInt i -> print_int i
+  | PBool b -> print_string (string_of_bool b)
+  | PVar x -> print_string x
+  | PPair (p1, p2) ->
+     (print_string "(";
+      print_pattern p1;
+      print_string ",";
+      print_pattern p2;
+      print_string ")")
+  | PNil -> print_string "[]"
+  | PCons (p1, p2) ->
+     (print_pattern p1;
+      print_string "::";
+      print_pattern p2)
+
+let rec print_value v =
   match v with
   | VInt i  -> print_string "VInt("; print_int i; print_string ")"
   | VBool b -> print_string "VBool("; print_string (string_of_bool b); print_string ")"
-  | VFun (x, e, env) -> print_string "VFun("; print_name x; print_string ")"
-  | VRecFun (f, x, e, env) -> print_string "VRecFun("; print_name f; print_string ","; print_name x; print_string ")"
+  | VFun (x, e, env) -> print_string "VFun("; print_name x; print_string ")="; print_expr e
+  | VRecFun (f, x, e, env) -> print_string "VRecFun("; print_name f; print_string ","; print_name x; print_string ")="; print_expr e
   | VError s -> print_string "Error: "; print_string s
-let rec print_expr e =
+  | VPair (v1, v2) -> print_string "VPair("; print_value v1; print_string ","; pring_value v2; print_string")"
+and print_expr e =
   match e with
   | EConstInt i ->
      print_int i
@@ -135,6 +168,33 @@ let rec print_expr e =
       print_string ",";
       print_expr e2;
       print_string ")")
+  | EPair (e1, e2) ->
+     (print_string "EPair (";
+      print_expr e1;
+      print_string ",";
+      print_expr e2;
+      print_string ")")
+  | ENil ->
+     print_string "ENil"
+  | ECons (e1, e2) ->
+     (print_string "ECons (";
+      print_expr e1;
+      print_string ",";
+      print_expr e2;
+      print_string ")")
+| EMatch (e, cases) ->
+     (print_string "EMatch (";
+      print_expr e;
+      print_string ",";
+      print_cases cases;
+      print_string ")")
+and print_cases cases =
+  List.iter (fun (p, e) ->
+	     print_pattern p;
+	     print_string " -> ";
+	     print_expr e;
+	     print_string ",")
+	    cases
 
 let rec print_command p =
   match p with

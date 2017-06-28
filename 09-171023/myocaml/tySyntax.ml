@@ -6,6 +6,8 @@ type ty =
   | TyBool
   | TyFun of ty * ty
   | TyVar of tyvar
+  | TyPair of ty * ty
+  | TyList of ty list
 
 let tvar = ref 0;;
 

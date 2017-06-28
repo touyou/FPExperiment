@@ -15,6 +15,23 @@ let extend x v env = (x, v) :: env
 let rec lookup x env =
   try List.assoc x env with Not_found -> raise Unbound
 
+(* find_match : pattern -> value -> (name * value) list option *)
+let rec find_match p v =
+  match p, v with
+  | (PInt x, VInt y) -> if x=y then Some [] else None
+  | (PBool x, VBool y) -> if x=y then Some [] else None
+  | (PVar n, m) -> Some [(n, m)]
+  | (PPair (x1,y1), VPair (x2,y2)) ->
+      match find_match x1 x2, find_match x2 y2 with
+      | (Some r1, Some r2) -> Some r1@r2
+      | (_, _) -> None		
+  | (PCons (x1,y1), VCons (x2,y2)) ->
+      match find_match x1 x2, find_match x2 y2 with
+      | (Some r1, Some r2) -> Some r1@r2
+      | (_, _) -> None
+  | (PNil, VNil) -> Some []
+  | (_, _) -> None
+
 (* infer_expr: tyenv->expr->ty * constraints *)
 let rec infer_expr env e =
   match e with
@@ -51,38 +68,26 @@ let rec infer_expr env e =
     let (t1, c1) = infer_expr ((f, TyFun (alpha, beta)) :: ((x, alpha) :: env)) e1 in
     let (t2, c2) = infer_expr ((f, TyFun (alpha, beta)) :: env) e2 in
     (t2, (t1, beta) :: c1 @ c2)
-  | EAdd (e1, e2) ->
-    let (t1, c1) = infer_expr env e1 in
-    let (t2, c2) = infer_expr env e2 in
-    (TyInt, [(t1, TyInt); (t2, TyInt)] @ c1 @ c2)
-  | ESub (e1, e2) ->
-    let (t1, c1) = infer_expr env e1 in
-    let (t2, c2) = infer_expr env e2 in
-    (TyInt, [(t1, TyInt); (t2, TyInt)] @ c1 @ c2)
-  | EMul (e1, e2) ->
-    let (t1, c1) = infer_expr env e1 in
-    let (t2, c2) = infer_expr env e2 in
-    (TyInt, [(t1, TyInt); (t2, TyInt)] @ c1 @ c2)
+  | EAdd (e1, e2)
+  | ESub (e1, e2)
+  | EMul (e1, e2)
   | EDiv (e1, e2) ->
     let (t1, c1) = infer_expr env e1 in
     let (t2, c2) = infer_expr env e2 in
     (TyInt, [(t1, TyInt); (t2, TyInt)] @ c1 @ c2)
-  | EEq (e1, e2) ->
-    let (t1, c1) = infer_expr env e1 in
-    let (t2, c2) = infer_expr env e2 in
-    (TyBool, [(t1, TyInt); (t2, TyInt)] @ c1 @ c2)
+  | EEq (e1, e2)
   | ELt (e1, e2) ->
     let (t1, c1) = infer_expr env e1 in
     let (t2, c2) = infer_expr env e2 in
     (TyBool, [(t1, TyInt); (t2, TyInt)] @ c1 @ c2)
-  | EAnd (e1, e2) ->
-    let (t1, c1) = infer_expr env e1 in
-    let (t2, c2) = infer_expr env e2 in
-    (TyBool, [(t1, TyBool); (t2, TyBool)] @ c1 @ c2)
+  | EAnd (e1, e2)
   | EOr (e1, e2) ->
     let (t1, c1) = infer_expr env e1 in
     let (t2, c2) = infer_expr env e2 in
     (TyBool, [(t1, TyBool); (t2, TyBool)] @ c1 @ c2)
+  | EMatch (e, p) ->
+    let (t, c) = infer_expr env e in
+
 
 (* infer_cmd: tyenv->cmd->ty*tyenv *)
 let infer_cmd env c =
@@ -187,6 +192,29 @@ let rec eval_expr env e =
        let env' = extend x v2 (extend f (VRecFun(f,x,e,oenv)) oenv) in
        eval_expr env' e
      | _ -> raise EvalUnbound)
+  | EPair (e1, e2) ->
+    let v1 = eval_expr env e1 in
+    let v2 = eval_expr env e2 in
+    VPair (v1, v2)
+  | ENil -> VNil
+  | ECons (e1, e2) ->
+    let v1 = eval_expr env e1 in
+    let v2 = eval_expr env e2 in
+    VCons (v1, v2)
+  | EMatch (e1, p) ->
+    let v = eval_expr env e in
+    lookup_match p v env
+(* lookup_match: (pattern * expr) list -> value -> env ->  *)
+and lookup_match p v env =
+  match p with
+  | [] -> raise EvalType
+  | (pat, exp) :: pr ->
+    let ret = find_match pat v in
+    if ret = None then lookup_match pr else
+      let Some e = ret in
+      let env' = e @ env in
+      eval_expr env' exp
+
 
 let rec eval_command env c =
   match c with
