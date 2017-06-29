@@ -1,7 +1,11 @@
+{
+  exception Unknown
+}
+
 let digit = ['0'-'9']
 let space = ' ' | '\t' | '\r' | '\n'
-let alpha = ['a'-'z' 'A'-'Z' '_' ] 
-let ident = alpha (alpha | digit)* 
+let alpha = ['a'-'z' 'A'-'Z' '_' ]
+let ident = alpha (alpha | digit)*
 
 rule main = parse
 | space+       { main lexbuf }
@@ -33,4 +37,4 @@ rule main = parse
 | ";;"         { Parser.SEMISEMI }
 | digit+ as n  { Parser.INT (int_of_string n) }
 | ident  as id { Parser.ID id }
-| _            { failwith ("Unknown Token: " ^ Lexing.lexeme lexbuf)}
+| _            { raise Unknown }

@@ -1,4 +1,4 @@
-type name = string 
+type name = string
 
 type pattern =
   | PInt  of int
@@ -7,17 +7,17 @@ type pattern =
   | PPair of pattern * pattern
   | PNil
   | PCons of pattern * pattern
-	       
+
 type expr =
   | EConstInt  of int
   | EConstBool of bool
-  | EVar       of name 
+  | EVar       of name
   | EAdd       of expr * expr
   | ESub       of expr * expr
   | EMul       of expr * expr
   | EDiv       of expr * expr
   | EEq        of expr * expr
-  | ELt        of expr * expr		 
+  | ELt        of expr * expr
   | EIf        of expr * expr * expr
   | ELet       of name * expr * expr
   | EFun       of name * expr
@@ -28,12 +28,22 @@ type expr =
   | ECons      of expr * expr
   | EMatch     of expr * (pattern * expr) list
 
+  type value =
+    | VInt of int
+    | VBool of bool
+    | VFun of name * expr * env
+    | VRecFun of name * name * expr * env
+    | VPair of value * value
+    | VNil
+    | VCons of value * value
+  and env = (name * value) list
+
 type command =
   | CExp     of expr
   | CDecl    of name * expr
   | CRecDecl of name * name * expr
-				  
-let print_name = print_string 
+
+let print_name = print_string
 
 let rec print_pattern p =
   match p with
@@ -51,40 +61,49 @@ let rec print_pattern p =
      (print_pattern p1;
       print_string "::";
       print_pattern p2)
-    
+
 (*
  小さい式に対しては以下でも問題はないが，
  大きいサイズの式を見やすく表示したければ，Formatモジュール
    http://caml.inria.fr/pub/docs/manual-ocaml/libref/Format.html
  を活用すること
 *)
-let rec print_expr e =
+let rec print_value v =
+  match v with
+  | VInt i  -> print_int i
+  | VBool b -> print_string (string_of_bool b)
+  | VFun (x, e, env) -> print_string "fun "; print_name x; print_string "->"; print_expr e
+  | VRecFun (f, x, e, env) -> print_name f; print_string "("; print_name x; print_string ")="; print_expr e
+  | VPair (v1, v2) -> print_string "("; print_value v1; print_string ","; print_value v2; print_string")"
+  | VCons (v1, v2) -> print_string "["; print_value v1; print_string ","; print_value v2; print_string"]"
+  | VNil -> print_string "[]"
+and print_expr e =
   match e with
   | EConstInt i ->
      print_int i
   | EConstBool b ->
      print_string (string_of_bool b)
-  | EVar x -> 
+  | EVar x ->
      print_name x
-  | EAdd (e1,e2) -> 
+  | EAdd (e1,e2) ->
      (print_string "EAdd (";
       print_expr e1;
       print_string ",";
       print_expr e2;
       print_string ")")
-  | ESub (e1,e2) -> 
+  | ESub (e1,e2) ->
      (print_string "ESub (";
       print_expr e1;
       print_string ",";
       print_expr e2;
       print_string ")")
-  | EMul (e1,e2) -> 
+  | EMul (e1,e2) ->
      (print_string "EMul (";
       print_expr e1;
       print_string ",";
       print_expr e2;
       print_string ")")
-  | EDiv (e1,e2) -> 
+  | EDiv (e1,e2) ->
      (print_string "EDiv (";
       print_expr e1;
       print_string ",";
@@ -105,7 +124,7 @@ let rec print_expr e =
   | EIf (e1,e2,e3) ->
      (print_string "EIf (";
       print_expr   e1;
-      print_string ","; 
+      print_string ",";
       print_expr   e2;
       print_string ",";
       print_expr   e3;
@@ -159,10 +178,10 @@ and print_cases cases =
 	     print_expr e;
 	     print_string ",")
 	    cases
-		   
 
-       
-let rec print_command p =       
+
+
+let rec print_command p =
   match p with
   | CExp e -> print_expr e
   | CDecl (x,e) ->
