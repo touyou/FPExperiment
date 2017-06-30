@@ -1,4 +1,6 @@
 open Syntax
+open TySyntax
+open ConstraintSolver
 
 exception Unbound
 exception EvalUnbound
