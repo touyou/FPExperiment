@@ -1,0 +1,31 @@
+171023 藤井陽介
+
+【実行例】
+# (1, 2);;
+- :  = (1,2)
+# (true, false);;
+- :  = (true,false)
+# (1, true);;
+- :  = (1,true)
+# [];;
+- :  = []
+# 2 :: 4;;
+- :  = [2,4]
+# 5 :: true;;
+- :  = [5,true]
+# true :: false;;
+- :  = [true,false]
+
+【考察】
+ex1で実装しています。evalに関しては単純に二つを評価してVPairやVConsでつつむというだけの処理のため、コンスの方で違う型の組を弾いていない状態になっています。
+
+【コード】
+| EPair (e1, e2) ->
+  let v1 = eval_expr env e1 in
+  let v2 = eval_expr env e2 in
+  VPair (v1, v2)
+| ENil -> VNil
+| ECons (e1, e2) ->
+  let v1 = eval_expr env e1 in
+  let v2 = eval_expr env e2 in
+  VCons (v1, v2)

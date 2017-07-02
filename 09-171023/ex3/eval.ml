@@ -135,7 +135,8 @@ let infer_cmd env c =
       let beta = TyVar (new_tyvar ()) in
       let (t, c) = infer_expr ((f, TyFun (alpha, beta)) :: (x, alpha) :: env) e in
       let t' = ty_subst (unify c) t in
-      (TyFun (alpha, t'), (f, t') :: env)
+      let xt = ty_subst (unify c) alpha in
+      (TyFun (xt, t'), (f, TyFun(alpha, t')) :: env)
   with
   | TyError -> raise Unbound
   | EvalUnbound -> raise Unbound

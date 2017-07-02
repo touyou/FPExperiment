@@ -1,0 +1,32 @@
+171023 藤井陽介
+
+【実行例】
+# let x = (1, 2);;
+x :  = (1,2)
+# match x with (1, 2) -> 10 | _ -> 0;;
+- :  = 10
+# match 10 with (9 ,0) -> 7 | _ -> 2;;
+- :  = 2
+# match true with true -> true | false -> 10;;
+- :  = true
+# match true with 1 -> 0 | 2 -> 4;;
+Error: Type Missmatch.
+
+【考察】
+ex2の中で実装しています。パターンを全て走査しなくてはならないのでandでeval_matchという関数を用意し、例題でつくったfind_matchをつかって実装しています。こちらも型推論をしておらず単純に評価しているので違う型の返り値やパターンと型があっていなくてもPVarで拾われて処理されるようになっています。
+
+【コード】
+(* pattern match eval *)
+  | EMatch (e, p) ->
+    let v = eval_expr env e in
+    eval_match p v env
+and eval_match p v env =
+  match p with
+  | [] -> raise EvalType
+  | (pat, exp) :: pr ->
+    let ret = find_match pat v in
+    (match ret with
+    | None -> eval_match pr v env
+    | Some e ->
+      let env' = e @ env in
+      eval_expr env' exp)
