@@ -1,7 +1,7 @@
-SOURCES = syntax.ml lexer.mll parser.mly eval.ml main.ml
+SOURCES = tySyntax.ml constraintSolver.ml syntax.ml lexer.mll parser.mly eval.ml main.ml
 RESULT  = main
 
-YFLAGS = -v 
+YFLAGS = -v
 
 all: byte-code byte-code-library
 

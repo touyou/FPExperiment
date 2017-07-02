@@ -20,10 +20,16 @@ let rec ty_subst s t =
   | TyBool -> TyBool
   | TyFun (x, y) -> TyFun (ty_subst s x, ty_subst s y)
   | TyVar x ->
-    try
+    (try
       lookup_subst s x
     with
-    | SubstUnbound -> TyVar x
+    | SubstUnbound -> TyVar x)
+  | TyPair (x, y) -> TyPair (ty_subst s x, ty_subst s y)
+  | TyList x -> TyList (subst_list s x [])
+and subst_list s l arr =
+  match l with
+  | [] -> arr
+  | x :: xr -> subst_list s xr ((ty_subst s x) :: arr)
 ;;
 
 (* compose : subst -> subst -> subst *)
@@ -48,8 +54,10 @@ let rec unify c =
         unify cr
       else
         match t1, t2 with
-        | (TyFun (s1, r1), TyFun (s2, r2)) -> unify ((s1, s2)::(r1,r2)::cr)
-        | (TyVar x, t) -> if (ty_subst ((x, t)::[]) t) = t then (x, t) :: (unify (subst_con ((x, t)::[]) cr)) else raise TyError
-        | (t, TyVar x) -> if (ty_subst ((x, t)::[]) t) = t then (x, t) :: (unify (subst_con ((x, t)::[]) cr)) else raise TyError
+        | TyFun (s1, r1), TyFun (s2, r2) -> unify ((s1, s2)::(r1,r2)::cr)
+        | TyVar x, t -> if (ty_subst ((x, t)::[]) t) = t then (x, t) :: (unify (subst_con ((x, t)::[]) cr)) else raise TyError
+        | t, TyVar x -> if (ty_subst ((x, t)::[]) t) = t then (x, t) :: (unify (subst_con ((x, t)::[]) cr)) else raise TyError
+        | TyPair (s1, t1), TyPair (s2, t2) -> unify ((s1, s2) :: (t1, t2) :: cr)
+        | TyList (t1 :: tr1), TyList (t2 :: tr2) -> unify ((t1, t2) :: cr)
         | (_, _) -> raise TyError
 ;;

@@ -23,4 +23,5 @@ ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).
 
 sibling(X, Y) :- parent(X, Z), parent(Y, Z).
 
+bloodrelative(X, Y) :- parent(X, Y).
 bloodrelative(X, Y) :- ancestor(X, Z), ancestor(Y, Z).

@@ -72,12 +72,13 @@ let rec print_value v =
   match v with
   | VInt i  -> print_int i
   | VBool b -> print_string (string_of_bool b)
-  | VFun (x, e, env) -> print_string "fun "; print_name x; print_string "->"; print_expr e
-  | VRecFun (f, x, e, env) -> print_name f; print_string "("; print_name x; print_string ")="; print_expr e
+  | VFun (_, _, _) -> print_string "<fun>"
+  | VRecFun (f, x, _, _) -> print_name f; print_string "("; print_name x; print_string ")"
   | VPair (v1, v2) -> print_string "("; print_value v1; print_string ","; print_value v2; print_string")"
   | VCons (v1, v2) -> print_string "["; print_value v1; print_string ","; print_value v2; print_string"]"
   | VNil -> print_string "[]"
-and print_expr e =
+
+let rec print_expr e =
   match e with
   | EConstInt i ->
      print_int i

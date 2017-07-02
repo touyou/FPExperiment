@@ -1,0 +1,25 @@
+171023 藤井陽介
+
+【実行例】
+?- bloodrelative(kobo,X).
+X = koji ;
+X = sanae ;
+X = kobo ;
+X = miho ;
+X = kobo ;
+X = miho ;
+X = sanae ;
+X = kobo ;
+X = miho ;
+X = sanae ;
+X = kobo ;
+X = miho ;
+false.
+
+【コード】
+bloodrelative(X, Y) :- parent(X, Y).
+bloodrelative(X, Y) :- ancestor(X, Z), ancestor(Y, Z).
+
+【考察】
+family.plに書いています。
+ancestorのみを判定していると親が抜けてしまうので親であることの条件を追加しました。
