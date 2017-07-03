@@ -44,10 +44,6 @@ let rec read_eval_print env tenv =
     print_newline ();
     read_eval_print env tenv)
 
-let initial_env =
-  extend "i" (VInt 1)
-	 (extend "v" (VInt 5)
-		 (extend "x" (VInt 10)
-			 empty_env))
+let initial_env = empty_env
 
 let _ = read_eval_print initial_env []

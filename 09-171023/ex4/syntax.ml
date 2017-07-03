@@ -18,8 +18,8 @@ type expr =
   | EPair      of expr * expr
   | ENil
   | ECons      of expr * expr
-
-type value =
+  | ERecFun    of name * name * expr * env
+and value =
   | VInt of int
   | VBool of bool
   | VFun of name * expr * env
@@ -27,7 +27,8 @@ type value =
   | VPair of value * value
   | VNil
   | VCons of value * value
-and env = (name * value) list
+and env = (name * thunk) list
+and thunk = Thunk of expr * env
 
 type command =
   | CExp     of expr
@@ -46,12 +47,12 @@ let rec print_value v =
   match v with
   | VInt i  -> print_int i
   | VBool b -> print_string (string_of_bool b)
-  | VFun (x, e, env) -> print_string "fun "; print_name x; print_string "->"; print_expr e
-  | VRecFun (f, x, e, env) -> print_name f; print_string "("; print_name x; print_string ")="; print_expr e
+  | VFun (x, e, env) -> print_string "<fun>"
+  | VRecFun (f, x, e, env) -> print_name f; print_string "("; print_name x; print_string ")"
   | VPair (v1, v2) -> print_string "("; print_value v1; print_string ","; print_value v2; print_string")"
   | VCons (v1, v2) -> print_string "["; print_value v1; print_string ","; print_value v2; print_string"]"
   | VNil -> print_string "[]"
-and print_expr e =
+let rec print_expr e =
   match e with
   | EConstInt i ->
      print_int i
@@ -139,6 +140,8 @@ and print_expr e =
       print_string ",";
       print_expr e2;
       print_string ")")
+  | ERecFun (f, x, e, env) ->
+    print_string "ERecFun"
 
 
 let rec print_command p =
