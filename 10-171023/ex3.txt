@@ -1,0 +1,25 @@
+171023 藤井陽介
+
+【実行例】
+?- reverse([1, 2, 3], X).
+X = [3, 2, 1].
+
+?- concat([[1], [2,3], [3,4,5]], X).
+X = [1, 2, 3, 3, 4, 5].
+
+【考察】
+どちらもappendを利用して実装しました。つまり、空リストのreverseもconcatも空リストであることをまず終了条件とし、reverseのほうはXの先頭一個とYの末尾一個が一致していることをZと[A]のappendであらわし、concatはAをつつまずそのままAとZの順のappendとして表現しています。
+ほぼおなじ実装ながらAを配列とみなすか要素をみなすか、さらにその順番でまったく違う操作を実現できることが実感できました。
+
+【コード】ex3.ml
+/* append */
+append([], Y, Y).
+append([A|X], Y, [A|Z]) :- append(X, Y, Z).
+
+/* reverse */
+reverse([], []).
+reverse([A|X], Y) :- reverse(X, Z), append(Z, [A], Y).
+
+/* concat */
+concat([], []).
+concat([A|X], Y) :- concat(X, Z), append(A, Z, Y).

@@ -1,0 +1,33 @@
+171023 藤井陽介
+
+【実行例】
+?- hamilton([1,2,3], X).
+X = [[1|2], [2|3]] .
+
+?- hamilton([1,3,7,9], X).
+X = [[1|3], [3|7], [7|9]] .
+
+?- hamilton(X, [[3|1], [1|2]]).
+X = [3, 1, 2].
+
+?- hamilton([1,2,3], [[1|3]]).
+false.
+
+?- hamilton([1,2,3], [[3|1], [1|2]]).
+true ;
+
+【考察】
+始点をきめて、そこからひとつずつ辿っていくことでハミルトン路か確かめるという方法で実装しました。
+;で続けようとすると停止しない現象がおきました（前から順にみていっているため順列に対する判定が厳しい？）
+
+【コード】
+/* hamilton(V, E) */
+search([[S|T]|E], S, T, E).
+search([[W|Z]|E], S, T, X) :- search(E, S, T, Y), append([[W|Z]], Y, X).
+
+searchV([V|X], V, X).
+searchV([W|X], V, Y) :- searchV(X, V, Z), append([W], Z, Y).
+
+hamiltonRec([], [], S).
+hamiltonRec(V, E, S) :- search(E, S, T, R), searchV(V, T, N), hamiltonRec(N, R, T).
+hamilton(V, [[S|T]|E]) :- searchV(V, S, N), hamiltonRec(N, [[S|T]|E], S).
