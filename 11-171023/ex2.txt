@@ -1,0 +1,8 @@
+171023 藤井陽介
+
+nat(z).
+nat(s(N)) :- nat(N).
+nat_list([]).
+nat_list([N|X]) :- nat(N), nat_list(X).
+
+nat_list(X)のような問い合わせが来た時、nat_listでは空リスト以外だとまずnat(N)を評価するが上が優先であるためこれは常にnat(z)でtrueを返すように評価されつづけ、結果Nがs(s(..s(z)..))というような可能性がはじかれてしまうため。

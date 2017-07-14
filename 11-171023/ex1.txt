@@ -1,0 +1,8 @@
+171023 藤井陽介
+
+ancestor(X,Y) :- ancestor(Z,Y), parent(X,Z).
+ancestor(X,Y) :- parent(X,Y).
+
+Prologは深さ優先であるからancestor(kobo, iwao)のような問い合わせの際は上の行かつ左のものが正しくなるまで評価され続ける。
+よって最初にancestor(Z, iwao)が評価されることになるが、この呼び出しでもancestor(Z, iwao)が評価されることになりここで無限ループに陥る。
+よってこれは停止しない。
