@@ -1,3 +1,4 @@
+judge(P, _) :- eq(P, e), !, false.
 judge(P, [P,P,P,_,_,_,_,_,_]).
 judge(P, [_,_,_,P,P,P,_,_,_]).
 judge(P, [_,_,_,_,_,_,P,P,P]).
@@ -20,11 +21,12 @@ next(P, [_,_,_,_,_,_,e,_,_], [_,_,_,_,_,_,P,_,_]).
 next(P, [_,_,_,_,_,_,_,e,_], [_,_,_,_,_,_,_,P,_]).
 next(P, [_,_,_,_,_,_,_,_,e], [_,_,_,_,_,_,_,_,P]).
 
-neq(P, Q) :- P is Q, !, false.
+eq(P, P).
+neq(P, Q) :- eq(P, Q), !, false.
 neq(_, _).
 
 win(P, B) :- judge(P, B).
-win(P, B) :- notjudge(Q, B), next(P, B, C), lose(Q, C).
+win(P, B) :- next(P, B, C), lose(Q, C), \+judge(Q, B).
 
 lose(P, B) :- neq(P, Q), judge(Q, B).
-lose(P, B) :- next(Q, B, C), win(Q, C).
+lose(P, B) :- next(Q, B, C), win(Q, C), \+judge(P, B).
