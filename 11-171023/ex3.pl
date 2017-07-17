@@ -11,22 +11,27 @@ judge(P, [_,_,P,_,P,_,P,_,_]).
 notjudge(P, B) :- judge(P, B), !, false.
 notjudge(_, [_,_,_,_,_,_,_,_,_]).
 
-next(P, [e,_,_,_,_,_,_,_,_], [P,_,_,_,_,_,_,_,_]).
-next(P, [_,e,_,_,_,_,_,_,_], [_,P,_,_,_,_,_,_,_]).
-next(P, [_,_,e,_,_,_,_,_,_], [_,_,P,_,_,_,_,_,_]).
-next(P, [_,_,_,e,_,_,_,_,_], [_,_,_,P,_,_,_,_,_]).
-next(P, [_,_,_,_,e,_,_,_,_], [_,_,_,_,P,_,_,_,_]).
-next(P, [_,_,_,_,_,e,_,_,_], [_,_,_,_,_,P,_,_,_]).
-next(P, [_,_,_,_,_,_,e,_,_], [_,_,_,_,_,_,P,_,_]).
-next(P, [_,_,_,_,_,_,_,e,_], [_,_,_,_,_,_,_,P,_]).
-next(P, [_,_,_,_,_,_,_,_,e], [_,_,_,_,_,_,_,_,P]).
+next(P, [e,A,B,C,D,E,F,G,H], [P,A,B,C,D,E,F,G,H]).
+next(P, [A,e,B,C,D,E,F,G,H], [A,P,B,C,D,E,F,G,H]).
+next(P, [A,B,e,C,D,E,F,G,H], [A,B,P,C,D,E,F,G,H]).
+next(P, [A,B,C,e,D,E,F,G,H], [A,B,C,P,D,E,F,G,H]).
+next(P, [A,B,C,D,e,E,F,G,H], [A,B,C,D,P,E,F,G,H]).
+next(P, [A,B,C,D,E,e,F,G,H], [A,B,C,D,E,P,F,G,H]).
+next(P, [A,B,C,D,E,F,e,G,H], [A,B,C,D,E,F,P,G,H]).
+next(P, [A,B,C,D,E,F,G,e,H], [A,B,C,D,E,F,G,P,H]).
+next(P, [A,B,C,D,E,F,G,H,e], [A,B,C,D,E,F,G,H,P]).
+
+op(x, o).
+op(o, x).
 
 eq(P, P).
-neq(P, Q) :- eq(P, Q), !, false.
-neq(_, _).
+
+end(B) :- next(o, B, _), !, false.
+end(B) :- next(x, B, _), !, false.
+end(_).
 
 win(P, B) :- judge(P, B).
-win(P, B) :- next(P, B, C), lose(Q, C), \+judge(Q, B).
+win(P, B) :- op(P, Q), \+judge(Q, B), next(P, B, C), lose(Q, C).
 
-lose(P, B) :- neq(P, Q), judge(Q, B).
-lose(P, B) :- next(Q, B, C), win(Q, C), \+judge(P, B).
+lose(P, B) :- op(P, Q), judge(Q, B).
+lose(P, B) :- op(P, Q), \+end(B), next(P, B, C), win(Q, C).

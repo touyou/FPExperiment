@@ -10,16 +10,17 @@ true .
 ?- win(o, [e,o,e,x,e,e,e,e,e]).
 true .
 
-?- \+ win(o, [e,e,e,e,e,e,e,e,e]).
-true.
+?- \+ win(P, [e,e,e,e,e,e,e,e,e]).
+false.
 
-?- \+ lose(o, [e,e,e,e,e,e,e,e,e]).
+?- \+ lose(P, [e,e,e,e,e,e,e,e,e]).
 false.
 
 【考察】
-
+最初の探索で[x,o,x,o,x,o,x,o,e]に行き着いてしまうのを直せず、正しく動作させることが出来ませんでした。
 
 【コード】
+judge(P, _) :- eq(P, e), !, false.
 judge(P, [P,P,P,_,_,_,_,_,_]).
 judge(P, [_,_,_,P,P,P,_,_,_]).
 judge(P, [_,_,_,_,_,_,P,P,P]).
@@ -29,18 +30,30 @@ judge(P, [_,_,P,_,_,P,_,_,P]).
 judge(P, [P,_,_,_,P,_,_,_,P]).
 judge(P, [_,_,P,_,P,_,P,_,_]).
 
-next(P, [e,_,_,_,_,_,_,_,_], [P,_,_,_,_,_,_,_,_]).
-next(P, [_,e,_,_,_,_,_,_,_], [_,P,_,_,_,_,_,_,_]).
-next(P, [_,_,e,_,_,_,_,_,_], [_,_,P,_,_,_,_,_,_]).
-next(P, [_,_,_,e,_,_,_,_,_], [_,_,_,P,_,_,_,_,_]).
-next(P, [_,_,_,_,e,_,_,_,_], [_,_,_,_,P,_,_,_,_]).
-next(P, [_,_,_,_,_,e,_,_,_], [_,_,_,_,_,P,_,_,_]).
-next(P, [_,_,_,_,_,_,e,_,_], [_,_,_,_,_,_,P,_,_]).
-next(P, [_,_,_,_,_,_,_,e,_], [_,_,_,_,_,_,_,P,_]).
-next(P, [_,_,_,_,_,_,_,_,e], [_,_,_,_,_,_,_,_,P]).
+notjudge(P, B) :- judge(P, B), !, false.
+notjudge(_, [_,_,_,_,_,_,_,_,_]).
+
+next(P, [e,A,B,C,D,E,F,G,H], [P,A,B,C,D,E,F,G,H]).
+next(P, [A,e,B,C,D,E,F,G,H], [A,P,B,C,D,E,F,G,H]).
+next(P, [A,B,e,C,D,E,F,G,H], [A,B,P,C,D,E,F,G,H]).
+next(P, [A,B,C,e,D,E,F,G,H], [A,B,C,P,D,E,F,G,H]).
+next(P, [A,B,C,D,e,E,F,G,H], [A,B,C,D,P,E,F,G,H]).
+next(P, [A,B,C,D,E,e,F,G,H], [A,B,C,D,E,P,F,G,H]).
+next(P, [A,B,C,D,E,F,e,G,H], [A,B,C,D,E,F,P,G,H]).
+next(P, [A,B,C,D,E,F,G,e,H], [A,B,C,D,E,F,G,P,H]).
+next(P, [A,B,C,D,E,F,G,H,e], [A,B,C,D,E,F,G,H,P]).
+
+op(x, o).
+op(o, x).
+
+eq(P, P).
+
+end(B) :- next(o, B, _), !, false.
+end(B) :- next(x, B, _), !, false.
+end(_).
 
 win(P, B) :- judge(P, B).
-win(P, B) :- win(Q, B), next(P, B, C), lose(Q, C).
+win(P, B) :- op(P, Q), \+judge(Q, B), next(P, B, C), lose(Q, C).
 
-lose(P, B) :- judge(Q, B).
-lose(P, B) :- lose(P, B), next(Q, B, C), win(Q, C).
+lose(P, B) :- op(P, Q), judge(Q, B).
+lose(P, B) :- op(P, Q), \+end(B), next(P, B, C), win(Q, C).
