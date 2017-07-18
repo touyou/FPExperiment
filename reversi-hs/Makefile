@@ -5,10 +5,10 @@ SRCS=Play.hs Command.hs
 all: $(TARGETS) $(TARGETC)
 
 $(TARGETS): Server.hs $(SRCS)
-	ghc -O --make -o $(TARGETS) Server.hs 
+	ghc -O -XFlexibleContexts --make -o $(TARGETS) Server.hs 
 
 $(TARGETC): Client.hs $(SRCS)
-	ghc -O --make -o $(TARGETC) Client.hs 
+	ghc -O -XFlexibleContexts --make -o $(TARGETC) Client.hs 
 
 
 clean: 
