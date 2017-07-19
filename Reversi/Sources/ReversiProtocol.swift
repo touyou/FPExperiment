@@ -52,4 +52,5 @@ protocol BoardSystem {
     func flippableIndices(board: Board, color: ReversiState, pos: Pos) -> [Pos]
     func doMove(board: Board, com: ComputerState, color: ReversiState) -> Board
     func validMoves(board: Board, color: ReversiState) -> [Pos]
+    func count(board: Board, color: ReversiState) -> Int
 }
