@@ -72,16 +72,6 @@ let valid_moves board color =
   List.filter (is_valid_move board color)
     (mix ls ls)
 
-
-let play board color = 
-  let ms = valid_moves board color in 
-    if ms = [] then 
-      Pass 
-    else 
-      let k = Random.int (List.length ms) in 
-      let (i,j) = List.nth ms k in 
-	Mv (i,j) 
-
 let count board color = 
   let s = ref 0 in 
     for i=1 to 8 do 
@@ -91,6 +81,21 @@ let count board color =
     done;
     !s
 
+let eval board color i j =
+  count (doMove board (Mv (i,j)) color) color
+
+let rec best_move cost ms acc m =
+  match cost, ms with
+  | [], [] -> acc
+  | c :: cs, (x, y) :: xs -> if c > m then best_move cs xs (Mv (x,y)) c else best_move cs xs acc m
+
+let play board color = 
+  let ms = valid_moves board color in 
+    if ms = [] then 
+      Pass 
+    else 
+      let cost = List.map (fun (i, j) -> eval board color i j) ms in
+      best_move cost ms Pass 0
 
 let print_board board = 
   print_endline " |A B C D E F G H ";

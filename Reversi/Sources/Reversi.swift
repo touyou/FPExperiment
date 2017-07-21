@@ -34,6 +34,10 @@ final class Reversi {
     
     // MARK: - AI
     func play(board: Board, color: ReversiState) -> ComputerState {
+        guard let ms = validMoves(board: board, color: color), ms != [] else {
+            return .pass
+        }
+        
         return .pass
     }
 }
