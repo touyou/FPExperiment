@@ -82,7 +82,8 @@ let count board color =
     !s
 
 let eval board color i j =
-  count (doMove board (Mv (i,j)) color) color
+  let ms = flippable_indices board color (i,j) in
+  List.length ms
 
 let rec best_move cost ms acc m =
   match cost, ms with

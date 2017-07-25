@@ -11,7 +11,7 @@ import Foundation
 // MARK: - Base Class
 final class Reversi {
     internal var board: Board = [[State]]()
-    internal var dirs: [Pos] = [Pos]()
+    internal var dirs: [Pos] = []
     
     init() {
         // initialize board
@@ -34,10 +34,29 @@ final class Reversi {
     
     // MARK: - AI
     func play(board: Board, color: ReversiState) -> ComputerState {
-        guard let ms = validMoves(board: board, color: color), ms != [] else {
+        let ms: [Pos] = validMoves(board: board, color: color)
+        guard ms.count != 0 else {
             return .pass
         }
         
-        return .pass
+        var bestMove = ComputerState.pass
+        
+        let _ = ms.reduce(Int.min) { (premin, now) in
+            let cost = eval(board: board, color: color, pos: now)
+            if premin < cost {
+                bestMove = .move(now.0, now.1)
+                return cost
+            }
+            return premin
+        }
+        
+        return bestMove
+    }
+    
+    func eval(board: Board, color: ReversiState, pos: Pos) -> Int {
+        var cost = flippableIndices(board: board, color: color, pos: pos).count
+        cost -= validMoves(board: doMove(board: board, com: .move(pos.0, pos.1), color: color), color: color.oppositeState()).count
+        
+        return cost
     }
 }

@@ -83,7 +83,7 @@ extension Reversi: BoardSystem {
     typealias State = ReversiState
     typealias Board = [[State]]
     typealias Pos = (Int, Int)
-    
+
     func putC(s: State) -> String {
         switch s {
         case .none:
