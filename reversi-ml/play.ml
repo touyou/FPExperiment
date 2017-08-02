@@ -5,6 +5,18 @@ open Command
 
 type board = color array array 
 
+(* http://tony-mooori.blogspot.jp/2015/10/aic.html にある遺伝的アルゴリズムによる盤面の重み  *)
+let tony_board = [|
+  [|68;-12;53;-8;-8;53;-12;68|];
+  [|-12;-62;-33;-7;-7;-33;-62;-12|];
+  [|53;-33;26;8;8;26;-33;53|];
+  [|-8;-7;8;-18;-18;8;-7;-8|];
+  [|-8;-7;8;-18;-18;8;-7;-8|];
+  [|53;-33;26;8;8;26;-33;53|];
+  [|-12;-62;-33;-7;-7;-33;-62;-12|];
+  [|68;-12;53;-8;-8;53;-12;68|];
+|]
+
 let init_board () = 
   let board = Array.make_matrix 10 10 none in 
     for i=0 to 9 do 
@@ -81,9 +93,20 @@ let count board color =
     done;
     !s
 
+let danger = [2; 7]
+let safe = [1; 8]
+
+let copy_board board = Array.map (fun x -> Array.copy x) board
+
+let special_place i j =
+  ((List.length (List.filter (fun x -> i = x) danger)) + (List.length (List.filter (fun x -> j = x) danger)) - (List.length (List.filter (fun x -> i = x) safe)) - (List.length (List.filter (fun x -> j = x) safe))) * 12
+
 let eval board color i j =
   let ms = flippable_indices board color (i,j) in
-  List.length ms
+  let newboard = copy_board board in
+  let ns = valid_moves (doMove newboard (Mv (i,j)) color) (opposite_color color) in
+  let cost = (List.length ms) - (List.length ns) in
+  cost - (special_place i j) + tony_board.(i-1).(j-1)
 
 let rec best_move cost ms acc m =
   match cost, ms with
@@ -96,7 +119,7 @@ let play board color =
       Pass 
     else 
       let cost = List.map (fun (i, j) -> eval board color i j) ms in
-      best_move cost ms Pass 0
+      best_move cost ms Pass (Int32.to_int Int32.min_int)
 
 let print_board board = 
   print_endline " |A B C D E F G H ";

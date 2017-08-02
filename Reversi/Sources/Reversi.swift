@@ -9,7 +9,7 @@
 import Foundation
 
 // MARK: - Base Class
-final class Reversi {
+internal class Reversi {
     internal var board: Board = [[State]]()
     internal var dirs: [Pos] = []
     
